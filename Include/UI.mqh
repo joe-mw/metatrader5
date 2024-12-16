@@ -167,7 +167,7 @@ class UIHandler {
         ObjectSetInteger(0, m_sellButtonName, OBJPROP_BORDER_COLOR, m_iconBorderColor);
         ObjectSetString(0, m_sellButtonName, OBJPROP_TEXT, "▼");
 
-        SetPauseBuyButtonState(m_isSellActive);
+        SetPauseSellButtonState(m_isSellActive);
     }
 
     bool Render(const string &sparam, const int &id) {
