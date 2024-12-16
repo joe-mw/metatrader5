@@ -229,7 +229,7 @@ void OnTimer() {
 // To update Pause Button
 void OnChartEvent(const int id, const long &lparam, const double &dparam, const string &sparam) {
     Print("\nChart Event");
-    ui.Render();
+    ui.Render(sparam, id);
 }
 
 void OnTick(void) {

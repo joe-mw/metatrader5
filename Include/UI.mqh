@@ -81,23 +81,13 @@ class UIHandler {
         m_iconBorderColor = clrYellow;
         m_iconTextColor   = clrWhite;
 
+        // Timestamp label
         DrawDateTimeLabel();
 
-        Render();
-    }
-
-    // Refresh/Render the elements that need to be redrawn
-    void Render() {
-        DrawPauseButtons();
-    }
-
-    // Delete all/Clean up
-    void DeletePauseButtons() {
-        Print("Deleting UI items");
-        ObjectDelete(0, m_dateLabelName);
-        ObjectDelete(0, m_pauseButtonName);
-        ObjectDelete(0, m_buyButtonName);
-        ObjectDelete(0, m_sellButtonName);
+        // Controls
+        DrawPauseTradingStateButton();
+        DrawPauseBuyButton();
+        DrawPauseSellButton();
     }
 
     void DrawDateTimeLabel() {
@@ -121,27 +111,7 @@ class UIHandler {
         ObjectSetInteger(0, m_dateLabelName, OBJPROP_COLOR, clrWhite);
     }
 
-    // Getters and Setters for Button States
-    bool GetTradingState() const { return m_isTradingActive; }
-    void SetTradingState(bool state) {
-        m_isTradingActive = state;
-        UpdatePauseButton();
-    }
-
-    bool GetBuyState() const { return m_isBuyActive; }
-    void SetBuyState(bool state) {
-        m_isBuyActive = state;
-        UpdateBuyButton();
-    }
-
-    bool GetSellState() const { return m_isSellActive; }
-    void SetSellState(bool state) {
-        m_isSellActive = state;
-        UpdateSellButton();
-    }
-
-  private:
-    void DrawPauseButtons() {
+    void DrawPauseTradingStateButton() {
         Print("Drawing Pause/Play buttons");
 
         // Draw Main Pause/Play Button
@@ -157,6 +127,10 @@ class UIHandler {
         ObjectSetInteger(0, m_pauseButtonName, OBJPROP_COLOR, m_buttonTextColor);
         ObjectSetInteger(0, m_pauseButtonName, OBJPROP_BORDER_COLOR, m_buttonBorderColor);
 
+        UpdatePauseButton();
+    }
+
+    void DrawPauseBuyButton() {
         // Draw Buy Pause Button
         ObjectDelete(0, m_buyButtonName);
         ObjectCreate(0, m_buyButtonName, OBJ_BUTTON, 0, 0, 0);
@@ -173,6 +147,10 @@ class UIHandler {
         ObjectSetInteger(0, m_buyButtonName, OBJPROP_BORDER_COLOR, m_iconBorderColor);
         ObjectSetString(0, m_buyButtonName, OBJPROP_TEXT, "▲");
 
+        UpdateBuyButton();
+    }
+
+    void DrawPauseSellButton() {
         // Draw Sell Pause Button
         ObjectDelete(0, m_sellButtonName);
         ObjectCreate(0, m_sellButtonName, OBJ_BUTTON, 0, 0, 0);
@@ -189,37 +167,10 @@ class UIHandler {
         ObjectSetInteger(0, m_sellButtonName, OBJPROP_BORDER_COLOR, m_iconBorderColor);
         ObjectSetString(0, m_sellButtonName, OBJPROP_TEXT, "▼");
 
-        UpdatePauseButton();
-        UpdateBuyButton();
         UpdateSellButton();
-
-        Print("Drawing Pause buttons complete");
     }
 
-    // Update Button States
-    void UpdatePauseButton() {
-        if(ObjectFind(0, m_pauseButtonName) >= 0) {
-            ObjectSetInteger(0, m_pauseButtonName, OBJPROP_STATE, m_isTradingActive);
-            ObjectSetString(0, m_pauseButtonName, OBJPROP_TEXT, (m_isTradingActive ? m_buttonTextRunning : m_buttonTextPaused));
-            ObjectSetInteger(0, m_pauseButtonName, OBJPROP_BGCOLOR, (m_isTradingActive ? m_buttonColorRunning : m_buttonColorPaused));
-        }
-    }
-
-    void UpdateBuyButton() {
-        if(ObjectFind(0, m_buyButtonName) >= 0) {
-            ObjectSetInteger(0, m_buyButtonName, OBJPROP_STATE, m_isBuyActive);
-            ObjectSetInteger(0, m_buyButtonName, OBJPROP_BGCOLOR, (m_isBuyActive ? clrGreen : clrGray));
-        }
-    }
-
-    void UpdateSellButton() {
-        if(ObjectFind(0, m_sellButtonName) >= 0) {
-            ObjectSetInteger(0, m_sellButtonName, OBJPROP_STATE, m_isSellActive);
-            ObjectSetInteger(0, m_sellButtonName, OBJPROP_BGCOLOR, (m_isSellActive ? clrRed : clrGray));
-        }
-    }
-
-    bool RefreshButtons(const string &sparam, const int &id) {
+    bool Render(const string &sparam, const int &id) {
         if(id != CHARTEVENT_OBJECT_CLICK) {
             Print("Event is not an object click. Exiting RefreshButtons.");
             return false;
@@ -247,5 +198,57 @@ class UIHandler {
         }
 
         return false;
+    }
+
+    // Getters and Setters for Button States
+    bool GetTradingState() const { return m_isTradingActive; }
+    void SetTradingState(bool state) {
+        m_isTradingActive = state;
+        UpdatePauseButton();
+    }
+
+    bool GetBuyState() const { return m_isBuyActive; }
+    void SetBuyState(bool state) {
+        m_isBuyActive = state;
+        UpdateBuyButton();
+    }
+
+    bool GetSellState() const { return m_isSellActive; }
+    void SetSellState(bool state) {
+        m_isSellActive = state;
+        UpdateSellButton();
+    }
+
+    // Delete all/Clean up
+    void DeletePauseButtons() {
+        Print("Deleting UI items");
+        ObjectDelete(0, m_dateLabelName);
+        ObjectDelete(0, m_pauseButtonName);
+        ObjectDelete(0, m_buyButtonName);
+        ObjectDelete(0, m_sellButtonName);
+    }
+
+  private:
+    // Update Button States
+    void UpdatePauseButton() {
+        if(ObjectFind(0, m_pauseButtonName) >= 0) {
+            ObjectSetInteger(0, m_pauseButtonName, OBJPROP_STATE, m_isTradingActive);
+            ObjectSetString(0, m_pauseButtonName, OBJPROP_TEXT, (m_isTradingActive ? m_buttonTextRunning : m_buttonTextPaused));
+            ObjectSetInteger(0, m_pauseButtonName, OBJPROP_BGCOLOR, (m_isTradingActive ? m_buttonColorRunning : m_buttonColorPaused));
+        }
+    }
+
+    void UpdateBuyButton() {
+        if(ObjectFind(0, m_buyButtonName) >= 0) {
+            ObjectSetInteger(0, m_buyButtonName, OBJPROP_STATE, m_isBuyActive);
+            ObjectSetInteger(0, m_buyButtonName, OBJPROP_BGCOLOR, (m_isBuyActive ? clrGreen : clrGray));
+        }
+    }
+
+    void UpdateSellButton() {
+        if(ObjectFind(0, m_sellButtonName) >= 0) {
+            ObjectSetInteger(0, m_sellButtonName, OBJPROP_STATE, m_isSellActive);
+            ObjectSetInteger(0, m_sellButtonName, OBJPROP_BGCOLOR, (m_isSellActive ? clrRed : clrGray));
+        }
     }
 };
