@@ -236,6 +236,9 @@ void OnChartEvent(const int id, const long &lparam, const double &dparam, const 
 
 void OnTick(void)
   {
+     // We need to draw it onTick, because in this context, time only makes sense if there's a tick.
+     // That way it gives us more information when we see the rate of the time change because we know
+     // behind the time change, is a tick, or the time wouldn't change.
      DrawDateTimeLabel();
   }
 

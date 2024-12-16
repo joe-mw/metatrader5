@@ -5,10 +5,13 @@
 //+------------------------------------------------------------------+
 #property strict
 
+// Datetime data
+const string dateLabelName = "DATETIME_LABEL";
+
 // Button data
 bool         ButtonState      = true;   // Button state, trading on or off, true = trade
 const string ButtonName       = "BUTTON_PAUSE";
-const int    ButtonXPosition  = 250;
+const int    ButtonXPosition  = 310;
 const int    ButtonYPosition  = 100;
 const int    ButtonWidth      = 120;
 const int    ButtonHeight     = 40;
@@ -28,7 +31,6 @@ const string ButtonTextPaused   = "Paused";
 const int    ButtonColourPaused = clrBlueViolet;
 
 void DrawDateTimeLabel() {
-    string labelName = "DATETIME_LABEL";
 
     // Get current time
     datetime    currentTime = TimeCurrent();
@@ -38,17 +40,17 @@ void DrawDateTimeLabel() {
     string dayNames[]   = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
     string dayOfWeek    = dayNames[timeStruct.day_of_week];
     string timeString   = TimeToString(currentTime, TIME_SECONDS);
-    string dateTimeText = dayOfWeek + " " + timeString;
+    string dateTimeText = (string)timeStruct.day + " " + dayOfWeek + " " + timeString;
 
-    ObjectDelete(0, labelName);
-    ObjectCreate(0, labelName, OBJ_LABEL, 0, 0, 0);
-    ObjectSetInteger(0, labelName, OBJPROP_XDISTANCE, ButtonXPosition);
-    ObjectSetInteger(0, labelName, OBJPROP_YDISTANCE, ButtonYPosition - 50);
-    ObjectSetInteger(0, labelName, OBJPROP_CORNER, ButtonCorner);
-    ObjectSetString(0, labelName, OBJPROP_TEXT, dateTimeText);
-    ObjectSetString(0, labelName, OBJPROP_FONT, ButtonFont);
-    ObjectSetInteger(0, labelName, OBJPROP_FONTSIZE, ButtonFontSize);
-    ObjectSetInteger(0, labelName, OBJPROP_COLOR, clrWhite);
+    ObjectDelete(0, dateLabelName);
+    ObjectCreate(0, dateLabelName, OBJ_LABEL, 0, 0, 0);
+    ObjectSetInteger(0, dateLabelName, OBJPROP_XDISTANCE, ButtonXPosition);
+    ObjectSetInteger(0, dateLabelName, OBJPROP_YDISTANCE, ButtonYPosition - 50);
+    ObjectSetInteger(0, dateLabelName, OBJPROP_CORNER, ButtonCorner);
+    ObjectSetString(0, dateLabelName, OBJPROP_TEXT, dateTimeText);
+    ObjectSetString(0, dateLabelName, OBJPROP_FONT, ButtonFont);
+    ObjectSetInteger(0, dateLabelName, OBJPROP_FONTSIZE, ButtonFontSize);
+    ObjectSetInteger(0, dateLabelName, OBJPROP_COLOR, clrWhite);
 }
 
 void DrawPauseButton() {
@@ -71,6 +73,7 @@ void DrawPauseButton() {
 
 void DeletePauseButton() {
     Print("Delete Pause/Play button");
+    ObjectDelete(0, dateLabelName);
     ObjectDelete(0, ButtonName);
 }
 
