@@ -5,210 +5,247 @@
 //+------------------------------------------------------------------+
 #property strict
 
-// Datetime data
-const string dateLabelName = "DATETIME_LABEL";
+class UIHandler {
+  private:
+    // Datetime label
+    string m_dateLabelName;
 
-// Button data for Pause/Play
-bool         ButtonState       = true;   // Button state, trading on or off, true = trade
-const string ButtonName        = "BUTTON_PAUSE";
-const int    ButtonXPosition   = 310;
-const int    ButtonYPosition   = 100;
-const int    ButtonWidth       = 130;
-const int    ButtonHeight      = 50;
-const int    ButtonCorner      = CORNER_RIGHT_UPPER;
-const string ButtonFont        = "Comic Sans MS";
-const int    ButtonFontSize    = 12;
-const int    ButtonTextColour  = clrBlack;
-const int    ButtonBorderColor = clrYellow;
+    // Main Pause/Play Button properties
+    bool   m_isTradingActive;
+    string m_pauseButtonName;
+    int    m_pauseButtonXPosition;
+    int    m_pauseButtonYPosition;
+    int    m_pauseButtonWidth;
+    int    m_pauseButtonHeight;
+    int    m_buttonCorner;
+    string m_buttonFont;
+    int    m_buttonFontSize;
+    int    m_buttonTextColor;
+    int    m_buttonBorderColor;
 
-const int IconWidth       = 60;
-const int IconHeight      = ButtonHeight;
-const int IconBorderColor = clrYellow;
-const int IconTextColour  = clrWhite;
+    // Buy Pause Button properties
+    bool   m_isBuyActive;
+    string m_buyButtonName;
 
-// Button data for Pause Buy
-bool         ButtonStateBuy     = false;   // Pause Buy button state, false = allow buy trades
-const string ButtonNameBuy      = "BUTTON_PAUSE_BUY";
-const int    ButtonXPositionBuy = ButtonXPosition;
-const int    ButtonYPositionBuy = ButtonYPosition + ButtonHeight + 10;
+    // Sell Pause Button properties
+    bool   m_isSellActive;
+    string m_sellButtonName;
 
-// Button data for Pause Sell
-bool         ButtonStateSell     = false;   // Pause Sell button state, false = allow sell trades
-const string ButtonNameSell      = "BUTTON_PAUSE_SELL";
-const int    ButtonXPositionSell = ButtonXPosition;
-const int    ButtonYPositionSell = ButtonYPositionBuy + ButtonHeight + 10;
+    // Button labels and colors
+    string m_buttonTextRunning;
+    int    m_buttonColorRunning;
+    string m_buttonTextPaused;
+    int    m_buttonColorPaused;
 
-// When running
-const string ButtonTextRunning   = "Running";
-const int    ButtonColourRunning = clrMediumSpringGreen;
+    // Icon properties
+    int m_iconWidth;
+    int m_iconHeight;
+    int m_iconBorderColor;
+    int m_iconTextColor;
 
-// When paused
-const string ButtonTextPaused   = "Paused";
-const int    ButtonColourPaused = clrBlueViolet;
+  public:
+    UIHandler() {
+        // Datetime label
+        m_dateLabelName = "DATETIME_LABEL";
 
-void DrawDateTimeLabel() {
-    datetime    currentTime = TimeCurrent();
-    MqlDateTime timeStruct;
-    TimeToStruct(currentTime, timeStruct);
+        // Main Pause/Play Button properties
+        m_isTradingActive      = true;   // true = trading on
+        m_pauseButtonName      = "BUTTON_PAUSE";
+        m_pauseButtonXPosition = 310;
+        m_pauseButtonYPosition = 100;
+        m_pauseButtonWidth     = 130;
+        m_pauseButtonHeight    = 50;
+        m_buttonCorner         = CORNER_RIGHT_UPPER;
+        m_buttonFont           = "Comic Sans MS";
+        m_buttonFontSize       = 12;
+        m_buttonTextColor      = clrBlack;
+        m_buttonBorderColor    = clrYellow;
 
-    string dayNames[]   = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
-    string dayOfWeek    = dayNames[timeStruct.day_of_week];
-    string timeString   = TimeToString(currentTime, TIME_SECONDS);
-    string dateTimeText = (string)timeStruct.day + " " + dayOfWeek + " " + timeString;
+        // Buy Pause Button properties
+        m_isBuyActive   = true;   // true = allow buy trades
+        m_buyButtonName = "BUTTON_PAUSE_BUY";
 
-    ObjectDelete(0, dateLabelName);
-    ObjectCreate(0, dateLabelName, OBJ_LABEL, 0, 0, 0);
-    ObjectSetInteger(0, dateLabelName, OBJPROP_XDISTANCE, ButtonXPosition);
-    ObjectSetInteger(0, dateLabelName, OBJPROP_YDISTANCE, ButtonYPosition - 50);
-    ObjectSetInteger(0, dateLabelName, OBJPROP_CORNER, ButtonCorner);
-    ObjectSetString(0, dateLabelName, OBJPROP_TEXT, dateTimeText);
-    ObjectSetString(0, dateLabelName, OBJPROP_FONT, ButtonFont);
-    ObjectSetInteger(0, dateLabelName, OBJPROP_FONTSIZE, ButtonFontSize);
-    ObjectSetInteger(0, dateLabelName, OBJPROP_COLOR, clrWhite);
-}
+        // Sell Pause Button properties
+        m_isSellActive   = true;   // true = allow sell trades
+        m_sellButtonName = "BUTTON_PAUSE_SELL";
 
-void DrawPauseButtons() {
-    Print("Drawing Pause/Play buttons");
+        // Button labels and colors
+        m_buttonTextRunning  = "Running";
+        m_buttonColorRunning = clrMediumSpringGreen;
+        m_buttonTextPaused   = "Paused";
+        m_buttonColorPaused  = clrBlueViolet;
 
-    // Draw Main Pause/Play Button
-    ObjectDelete(0, ButtonName);
-    ObjectCreate(0, ButtonName, OBJ_BUTTON, 0, 0, 0);
-    ObjectSetInteger(0, ButtonName, OBJPROP_XDISTANCE, ButtonXPosition);
-    ObjectSetInteger(0, ButtonName, OBJPROP_YDISTANCE, ButtonYPosition);
-    ObjectSetInteger(0, ButtonName, OBJPROP_XSIZE, ButtonWidth);
-    ObjectSetInteger(0, ButtonName, OBJPROP_YSIZE, ButtonHeight);
-    ObjectSetInteger(0, ButtonName, OBJPROP_CORNER, ButtonCorner);
-    ObjectSetString(0, ButtonName, OBJPROP_FONT, ButtonFont);
-    ObjectSetInteger(0, ButtonName, OBJPROP_FONTSIZE, ButtonFontSize);
-    ObjectSetInteger(0, ButtonName, OBJPROP_COLOR, ButtonTextColour);
-    ObjectSetInteger(0, ButtonName, OBJPROP_BORDER_COLOR, ButtonBorderColor);
+        // Icon properties
+        m_iconWidth       = 60;
+        m_iconHeight      = m_pauseButtonHeight;
+        m_iconBorderColor = clrYellow;
+        m_iconTextColor   = clrWhite;
 
-    // Draw Pause Buy Button
-    ObjectDelete(0, ButtonNameBuy);
-    ObjectCreate(0, ButtonNameBuy, OBJ_BUTTON, 0, 0, 0);
-    ObjectSetInteger(0, ButtonNameBuy, OBJPROP_XDISTANCE, 150);
-    ObjectSetInteger(0, ButtonNameBuy, OBJPROP_YDISTANCE, 100);
-    ObjectSetInteger(0, ButtonNameBuy, OBJPROP_XSIZE, IconWidth);
-    ObjectSetInteger(0, ButtonNameBuy, OBJPROP_YSIZE, IconHeight);
-    ObjectSetInteger(0, ButtonNameBuy, OBJPROP_CORNER, ButtonCorner);
-    ObjectSetString(0, ButtonNameBuy, OBJPROP_FONT, ButtonFont);
-    ObjectSetInteger(0, ButtonNameBuy, OBJPROP_FONTSIZE, ButtonFontSize);
-    ObjectSetInteger(0, ButtonNameBuy, OBJPROP_COLOR, IconTextColour);
-    ObjectSetInteger(0, ButtonNameBuy, OBJPROP_BORDER_COLOR, IconBorderColor);
-    ObjectSetString(0, ButtonNameBuy, OBJPROP_TEXT, "▲");
+        DrawDateTimeLabel();
 
-    // Draw Pause Sell Button
-    ObjectDelete(0, ButtonNameSell);
-    ObjectCreate(0, ButtonNameSell, OBJ_BUTTON, 0, 0, 0);
-    ObjectSetInteger(0, ButtonNameSell, OBJPROP_XDISTANCE, 70);
-    ObjectSetInteger(0, ButtonNameSell, OBJPROP_YDISTANCE, 100);
-    ObjectSetInteger(0, ButtonNameSell, OBJPROP_XSIZE, IconWidth);
-    ObjectSetInteger(0, ButtonNameSell, OBJPROP_YSIZE, IconHeight);
-    ObjectSetInteger(0, ButtonNameSell, OBJPROP_CORNER, ButtonCorner);
-    ObjectSetString(0, ButtonNameSell, OBJPROP_FONT, ButtonFont);
-    ObjectSetInteger(0, ButtonNameSell, OBJPROP_FONTSIZE, ButtonFontSize);
-    ObjectSetInteger(0, ButtonNameSell, OBJPROP_COLOR, IconTextColour);
-    ObjectSetInteger(0, ButtonNameSell, OBJPROP_BORDER_COLOR, IconBorderColor);
-    ObjectSetString(0, ButtonNameSell, OBJPROP_TEXT, "▼");
-
-    // Set initial states
-    SetButtonStates();
-    Print("Drawing Pause buttons complete");
-}
-
-void DeletePauseButtons() {
-    Print("Delete UI items");
-    ObjectDelete(0, dateLabelName);
-    ObjectDelete(0, ButtonName);
-    ObjectDelete(0, ButtonNameBuy);
-    ObjectDelete(0, ButtonNameSell);
-}
-
-void SetButtonStates() {
-    // Main Pause/Play Button
-    if(ObjectFind(0, ButtonName) >= 0) {
-        ObjectSetInteger(0, ButtonName, OBJPROP_STATE, ButtonState);
-        ObjectSetString(0, ButtonName, OBJPROP_TEXT, (ButtonState ? ButtonTextRunning : ButtonTextPaused));
-        ObjectSetInteger(0, ButtonName, OBJPROP_BGCOLOR, (ButtonState ? ButtonColourRunning : ButtonColourPaused));
+        Render();
     }
 
-    // Pause Buy Button
-    if(ObjectFind(0, ButtonNameBuy) >= 0) {
-        ObjectSetInteger(0, ButtonNameBuy, OBJPROP_STATE, ButtonStateBuy);
-        ObjectSetInteger(0, ButtonNameBuy, OBJPROP_BGCOLOR, (ButtonStateBuy ? clrGray : clrGreen));
+    // Refresh/Render the elements that need to be redrawn
+    void Render() {
+        DrawPauseButtons();
     }
 
-    // Pause Sell Button
-    if(ObjectFind(0, ButtonNameSell) >= 0) {
-        ObjectSetInteger(0, ButtonNameSell, OBJPROP_STATE, ButtonStateSell);
-        ObjectSetInteger(0, ButtonNameSell, OBJPROP_BGCOLOR, (ButtonStateSell ? clrGray : clrRed));
+    // Delete all/Clean up
+    void DeletePauseButtons() {
+        Print("Deleting UI items");
+        ObjectDelete(0, m_dateLabelName);
+        ObjectDelete(0, m_pauseButtonName);
+        ObjectDelete(0, m_buyButtonName);
+        ObjectDelete(0, m_sellButtonName);
     }
-}
 
-// Doesn't affect strategy tester at all.
-bool RefreshButtons(const string &sparam, const int &id) {
-    bool returnVal = false;
+    void DrawDateTimeLabel() {
+        datetime    currentTime = TimeCurrent();
+        MqlDateTime timeStruct;
+        TimeToStruct(currentTime, timeStruct);
 
-    // Add more detailed logging
-    Print("RefreshButtons called with: sparam = " + sparam + ", id = " + (string)id);
+        string dayNames[]   = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
+        string dayOfWeek    = dayNames[timeStruct.day_of_week];
+        string timeString   = TimeToString(currentTime, TIME_SECONDS);
+        string dateTimeText = (string)timeStruct.day + " " + dayOfWeek + " " + timeString;
 
-    // Validate the event type first
-    if(id != CHARTEVENT_OBJECT_CLICK) {
-        Print("Event is not an object click. Exiting RefreshButtons.");
+        ObjectDelete(0, m_dateLabelName);
+        ObjectCreate(0, m_dateLabelName, OBJ_LABEL, 0, 0, 0);
+        ObjectSetInteger(0, m_dateLabelName, OBJPROP_XDISTANCE, m_pauseButtonXPosition);
+        ObjectSetInteger(0, m_dateLabelName, OBJPROP_YDISTANCE, m_pauseButtonYPosition - 50);
+        ObjectSetInteger(0, m_dateLabelName, OBJPROP_CORNER, m_buttonCorner);
+        ObjectSetString(0, m_dateLabelName, OBJPROP_TEXT, dateTimeText);
+        ObjectSetString(0, m_dateLabelName, OBJPROP_FONT, m_buttonFont);
+        ObjectSetInteger(0, m_dateLabelName, OBJPROP_FONTSIZE, m_buttonFontSize);
+        ObjectSetInteger(0, m_dateLabelName, OBJPROP_COLOR, clrWhite);
+    }
+
+    // Getters and Setters for Button States
+    bool GetTradingState() const { return m_isTradingActive; }
+    void SetTradingState(bool state) {
+        m_isTradingActive = state;
+        UpdatePauseButton();
+    }
+
+    bool GetBuyState() const { return m_isBuyActive; }
+    void SetBuyState(bool state) {
+        m_isBuyActive = state;
+        UpdateBuyButton();
+    }
+
+    bool GetSellState() const { return m_isSellActive; }
+    void SetSellState(bool state) {
+        m_isSellActive = state;
+        UpdateSellButton();
+    }
+
+  private:
+    void DrawPauseButtons() {
+        Print("Drawing Pause/Play buttons");
+
+        // Draw Main Pause/Play Button
+        ObjectDelete(0, m_pauseButtonName);
+        ObjectCreate(0, m_pauseButtonName, OBJ_BUTTON, 0, 0, 0);
+        ObjectSetInteger(0, m_pauseButtonName, OBJPROP_XDISTANCE, m_pauseButtonXPosition);
+        ObjectSetInteger(0, m_pauseButtonName, OBJPROP_YDISTANCE, m_pauseButtonYPosition);
+        ObjectSetInteger(0, m_pauseButtonName, OBJPROP_XSIZE, m_pauseButtonWidth);
+        ObjectSetInteger(0, m_pauseButtonName, OBJPROP_YSIZE, m_pauseButtonHeight);
+        ObjectSetInteger(0, m_pauseButtonName, OBJPROP_CORNER, m_buttonCorner);
+        ObjectSetString(0, m_pauseButtonName, OBJPROP_FONT, m_buttonFont);
+        ObjectSetInteger(0, m_pauseButtonName, OBJPROP_FONTSIZE, m_buttonFontSize);
+        ObjectSetInteger(0, m_pauseButtonName, OBJPROP_COLOR, m_buttonTextColor);
+        ObjectSetInteger(0, m_pauseButtonName, OBJPROP_BORDER_COLOR, m_buttonBorderColor);
+
+        // Draw Buy Pause Button
+        ObjectDelete(0, m_buyButtonName);
+        ObjectCreate(0, m_buyButtonName, OBJ_BUTTON, 0, 0, 0);
+        // ObjectSetInteger(0, m_buyButtonName, OBJPROP_XDISTANCE, m_pauseButtonXPosition);
+        // ObjectSetInteger(0, m_buyButtonName, OBJPROP_YDISTANCE, m_pauseButtonYPosition + m_pauseButtonHeight + 10);
+        ObjectSetInteger(0, m_buyButtonName, OBJPROP_XDISTANCE, 150);
+        ObjectSetInteger(0, m_buyButtonName, OBJPROP_YDISTANCE, 100);
+        ObjectSetInteger(0, m_buyButtonName, OBJPROP_XSIZE, m_iconWidth);
+        ObjectSetInteger(0, m_buyButtonName, OBJPROP_YSIZE, m_iconHeight);
+        ObjectSetInteger(0, m_buyButtonName, OBJPROP_CORNER, m_buttonCorner);
+        ObjectSetString(0, m_buyButtonName, OBJPROP_FONT, m_buttonFont);
+        ObjectSetInteger(0, m_buyButtonName, OBJPROP_FONTSIZE, m_buttonFontSize);
+        ObjectSetInteger(0, m_buyButtonName, OBJPROP_COLOR, m_iconTextColor);
+        ObjectSetInteger(0, m_buyButtonName, OBJPROP_BORDER_COLOR, m_iconBorderColor);
+        ObjectSetString(0, m_buyButtonName, OBJPROP_TEXT, "▲");
+
+        // Draw Sell Pause Button
+        ObjectDelete(0, m_sellButtonName);
+        ObjectCreate(0, m_sellButtonName, OBJ_BUTTON, 0, 0, 0);
+        // ObjectSetInteger(0, m_sellButtonName, OBJPROP_XDISTANCE, m_pauseButtonXPosition);
+        // ObjectSetInteger(0, m_sellButtonName, OBJPROP_YDISTANCE, m_pauseButtonYPosition + (m_pauseButtonHeight + 10) * 2);
+        ObjectSetInteger(0, m_sellButtonName, OBJPROP_XDISTANCE, 70);
+        ObjectSetInteger(0, m_sellButtonName, OBJPROP_YDISTANCE, 100);
+        ObjectSetInteger(0, m_sellButtonName, OBJPROP_XSIZE, m_iconWidth);
+        ObjectSetInteger(0, m_sellButtonName, OBJPROP_YSIZE, m_iconHeight);
+        ObjectSetInteger(0, m_sellButtonName, OBJPROP_CORNER, m_buttonCorner);
+        ObjectSetString(0, m_sellButtonName, OBJPROP_FONT, m_buttonFont);
+        ObjectSetInteger(0, m_sellButtonName, OBJPROP_FONTSIZE, m_buttonFontSize);
+        ObjectSetInteger(0, m_sellButtonName, OBJPROP_COLOR, m_iconTextColor);
+        ObjectSetInteger(0, m_sellButtonName, OBJPROP_BORDER_COLOR, m_iconBorderColor);
+        ObjectSetString(0, m_sellButtonName, OBJPROP_TEXT, "▼");
+
+        UpdatePauseButton();
+        UpdateBuyButton();
+        UpdateSellButton();
+
+        Print("Drawing Pause buttons complete");
+    }
+
+    // Update Button States
+    void UpdatePauseButton() {
+        if(ObjectFind(0, m_pauseButtonName) >= 0) {
+            ObjectSetInteger(0, m_pauseButtonName, OBJPROP_STATE, m_isTradingActive);
+            ObjectSetString(0, m_pauseButtonName, OBJPROP_TEXT, (m_isTradingActive ? m_buttonTextRunning : m_buttonTextPaused));
+            ObjectSetInteger(0, m_pauseButtonName, OBJPROP_BGCOLOR, (m_isTradingActive ? m_buttonColorRunning : m_buttonColorPaused));
+        }
+    }
+
+    void UpdateBuyButton() {
+        if(ObjectFind(0, m_buyButtonName) >= 0) {
+            ObjectSetInteger(0, m_buyButtonName, OBJPROP_STATE, m_isBuyActive);
+            ObjectSetInteger(0, m_buyButtonName, OBJPROP_BGCOLOR, (m_isBuyActive ? clrGreen : clrGray));
+        }
+    }
+
+    void UpdateSellButton() {
+        if(ObjectFind(0, m_sellButtonName) >= 0) {
+            ObjectSetInteger(0, m_sellButtonName, OBJPROP_STATE, m_isSellActive);
+            ObjectSetInteger(0, m_sellButtonName, OBJPROP_BGCOLOR, (m_isSellActive ? clrRed : clrGray));
+        }
+    }
+
+    bool RefreshButtons(const string &sparam, const int &id) {
+        if(id != CHARTEVENT_OBJECT_CLICK) {
+            Print("Event is not an object click. Exiting RefreshButtons.");
+            return false;
+        }
+
+        if(sparam == m_pauseButtonName) {
+            m_isTradingActive = !m_isTradingActive;
+            UpdatePauseButton();
+            PrintFormat("Main Pause/Play button toggled. New state: " + (string)m_isTradingActive);
+            return true;
+        }
+
+        if(sparam == m_buyButtonName) {
+            m_isBuyActive = !m_isBuyActive;
+            UpdateBuyButton();
+            PrintFormat("Pause Buy button toggled. New state: " + (string)m_isBuyActive);
+            return true;
+        }
+
+        if(sparam == m_sellButtonName) {
+            m_isSellActive = !m_isSellActive;
+            UpdateSellButton();
+            PrintFormat("Pause Sell button toggled. New state: " + (string)m_isSellActive);
+            return true;
+        }
+
         return false;
     }
-
-    // Check Main Pause/Play Button
-    if(sparam == ButtonName) {
-        ButtonState = !ButtonState;   // Toggle the state
-        SetButtonStates();
-        PrintFormat("Main Pause/Play button toggled. New state: " + (string)ButtonState);
-        returnVal = true;
-    }
-
-    // Check Pause Buy Button
-    if(sparam == ButtonNameBuy) {
-        ButtonStateBuy = !ButtonStateBuy;   // Toggle the state
-        SetButtonStates();
-        PrintFormat("Pause Buy button toggled. New state: " + (string)ButtonStateBuy);
-        returnVal = true;
-    }
-
-    // Check Pause Sell Button
-    if(sparam == ButtonNameSell) {
-        ButtonStateSell = !ButtonStateSell;   // Toggle the state
-        SetButtonStates();
-        PrintFormat("Pause Sell button toggled. New state: " + (string)ButtonStateSell);
-        returnVal = true;
-    }
-
-    return returnVal;
-}
-
-// Modify the check methods to ensure consistency
-bool CheckPauseButtonActiveCondition() {
-    // Always check the current state, regardless of tester mode
-    ButtonState     = ObjectGetInteger(0, ButtonName, OBJPROP_STATE);
-    ButtonStateBuy  = ObjectGetInteger(0, ButtonNameBuy, OBJPROP_STATE);
-    ButtonStateSell = ObjectGetInteger(0, ButtonNameSell, OBJPROP_STATE);
-    SetButtonStates();
-    return ButtonState;
-}
-
-bool CheckPauseBuyActiveCondition() {
-    // Always check the current state, regardless of tester mode
-    ButtonState     = ObjectGetInteger(0, ButtonName, OBJPROP_STATE);
-    ButtonStateBuy  = ObjectGetInteger(0, ButtonNameBuy, OBJPROP_STATE);
-    ButtonStateSell = ObjectGetInteger(0, ButtonNameSell, OBJPROP_STATE);
-    SetButtonStates();
-    return ButtonStateBuy;
-}
-
-bool CheckPauseSellActiveCondition() {
-    // Always check the current state, regardless of tester mode
-    ButtonState     = ObjectGetInteger(0, ButtonName, OBJPROP_STATE);
-    ButtonStateBuy  = ObjectGetInteger(0, ButtonNameBuy, OBJPROP_STATE);
-    ButtonStateSell = ObjectGetInteger(0, ButtonNameSell, OBJPROP_STATE);
-    SetButtonStates();
-    return ButtonStateSell;
-}
+};
