@@ -145,6 +145,7 @@ void SetButtonStates() {
     }
 }
 
+// Doesn't affect strategy tester at all.
 bool RefreshButtons(const string &sparam, const int &id) {
     bool returnVal = false;
 
@@ -158,22 +159,28 @@ bool RefreshButtons(const string &sparam, const int &id) {
     }
 
     // Check Main Pause/Play Button
-    ButtonState = !ButtonState;   // Toggle the state
-    SetButtonStates();
-    PrintFormat("Main Pause/Play button toggled. New state: " + (string)ButtonState);
+    if(sparam == ButtonName) {
+        ButtonState = !ButtonState;   // Toggle the state
+        SetButtonStates();
+        PrintFormat("Main Pause/Play button toggled. New state: " + (string)ButtonState);
+        returnVal = true;
+    }
 
     // Check Pause Buy Button
-    ButtonStateBuy = !ButtonStateBuy;   // Toggle the state
-    SetButtonStates();
-    PrintFormat("Pause Buy button toggled. New state: " + (string)ButtonStateBuy);
+    if(sparam == ButtonNameBuy) {
+        ButtonStateBuy = !ButtonStateBuy;   // Toggle the state
+        SetButtonStates();
+        PrintFormat("Pause Buy button toggled. New state: " + (string)ButtonStateBuy);
+        returnVal = true;
+    }
 
     // Check Pause Sell Button
-    ButtonStateSell = !ButtonStateSell;   // Toggle the state
-    SetButtonStates();
-    PrintFormat("Pause Sell button toggled. New state: " + (string)ButtonStateSell);
-
-    // Force chart redraw if state changed
-    ChartRedraw();
+    if(sparam == ButtonNameSell) {
+        ButtonStateSell = !ButtonStateSell;   // Toggle the state
+        SetButtonStates();
+        PrintFormat("Pause Sell button toggled. New state: " + (string)ButtonStateSell);
+        returnVal = true;
+    }
 
     return returnVal;
 }
@@ -181,20 +188,26 @@ bool RefreshButtons(const string &sparam, const int &id) {
 // Modify the check methods to ensure consistency
 bool CheckPauseButtonActiveCondition() {
     // Always check the current state, regardless of tester mode
-    ButtonState = ObjectGetInteger(0, ButtonName, OBJPROP_STATE);
+    ButtonState     = ObjectGetInteger(0, ButtonName, OBJPROP_STATE);
+    ButtonStateBuy  = ObjectGetInteger(0, ButtonNameBuy, OBJPROP_STATE);
+    ButtonStateSell = ObjectGetInteger(0, ButtonNameSell, OBJPROP_STATE);
     SetButtonStates();
     return ButtonState;
 }
 
 bool CheckPauseBuyActiveCondition() {
     // Always check the current state, regardless of tester mode
-    ButtonStateBuy = ObjectGetInteger(0, ButtonNameBuy, OBJPROP_STATE);
+    ButtonState     = ObjectGetInteger(0, ButtonName, OBJPROP_STATE);
+    ButtonStateBuy  = ObjectGetInteger(0, ButtonNameBuy, OBJPROP_STATE);
+    ButtonStateSell = ObjectGetInteger(0, ButtonNameSell, OBJPROP_STATE);
     SetButtonStates();
     return ButtonStateBuy;
 }
 
 bool CheckPauseSellActiveCondition() {
     // Always check the current state, regardless of tester mode
+    ButtonState     = ObjectGetInteger(0, ButtonName, OBJPROP_STATE);
+    ButtonStateBuy  = ObjectGetInteger(0, ButtonNameBuy, OBJPROP_STATE);
     ButtonStateSell = ObjectGetInteger(0, ButtonNameSell, OBJPROP_STATE);
     SetButtonStates();
     return ButtonStateSell;

@@ -232,9 +232,8 @@ void OnTimer() {
 
 // To update Pause Button
 void OnChartEvent(const int id, const long &lparam, const double &dparam, const string &sparam) {
+    Print("\nChart Event");
     RefreshButtons(sparam, id);
-
-    Print("Chart Event");
 }
 
 void OnTick(void) {
