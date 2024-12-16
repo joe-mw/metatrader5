@@ -131,7 +131,7 @@ void CheckForSignal() {
         bc = bc && Ask(s) > fma1 - 0.5 * diff;
         sc = sc && Bid(s) < fma1 + 0.5 * diff;
 
-        if(bc) {
+        if(bc && !CheckPauseBuyActiveCondition()) {
             double in = Ask(s);
             double sl = BuySL(SLType, SLLookback, in, SLDev, 0, s);
             double tp = in + TPCoef * MathAbs(in - sl);
@@ -139,7 +139,7 @@ void CheckForSignal() {
             Sleep(5000);
         }
 
-        else if(sc) {
+        else if(sc && !CheckPauseSellActiveCondition()) {
             double in = Bid(s);
             double sl = SellSL(SLType, SLLookback, in, SLDev, 0, s);
             double tp = in - TPCoef * MathAbs(in - sl);
@@ -154,8 +154,11 @@ void CheckForSignal() {
 //+------------------------------------------------------------------+
 int OnInit() {
 
+    // Draw it for the first time
+    DrawDateTimeLabel();
+
     // Draw Pause Button
-    DrawPauseButton();
+    DrawPauseButtons();
 
     ea.Init();
     ea.SetMagic(MagicNumber);
@@ -199,7 +202,7 @@ int OnInit() {
 void OnDeinit(const int reason) {
 
     // Delete Pause Button
-    DeletePauseButton();
+    DeletePauseButtons();
 
     EventKillTimer();
 }
@@ -229,17 +232,16 @@ void OnTimer() {
 
 // To update Pause Button
 void OnChartEvent(const int id, const long &lparam, const double &dparam, const string &sparam) {
-    string _sparam = sparam;
-    int    _id     = id;
-    RefreshButton(_sparam, _id);
+    RefreshButtons(sparam, id);
+
+    Print("Chart Event");
 }
 
-void OnTick(void)
-  {
-     // We need to draw it onTick, because in this context, time only makes sense if there's a tick.
-     // That way it gives us more information when we see the rate of the time change because we know
-     // behind the time change, is a tick, or the time wouldn't change.
-     DrawDateTimeLabel();
-  }
+void OnTick(void) {
+    // We need to draw it onTick, because in this context, time only makes sense if there's a tick.
+    // That way it gives us more information when we see the rate of the time change because we know
+    // behind the time change, is a tick, or the time wouldn't change.
+    DrawDateTimeLabel();
+}
 
 //+------------------------------------------------------------------+
