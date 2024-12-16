@@ -234,4 +234,9 @@ void OnChartEvent(const int id, const long &lparam, const double &dparam, const 
     RefreshButton(_sparam, _id);
 }
 
+void OnTick(void)
+  {
+     DrawDateTimeLabel();
+  }
+
 //+------------------------------------------------------------------+

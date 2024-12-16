@@ -8,8 +8,8 @@
 // Button data
 bool         ButtonState      = true;   // Button state, trading on or off, true = trade
 const string ButtonName       = "BUTTON_PAUSE";
-const int    ButtonXPosition  = 120;
-const int    ButtonYPosition  = 60;
+const int    ButtonXPosition  = 250;
+const int    ButtonYPosition  = 100;
 const int    ButtonWidth      = 120;
 const int    ButtonHeight     = 40;
 const int    ButtonCorner     = CORNER_RIGHT_UPPER;
@@ -26,6 +26,30 @@ const int    ButtonColourRunning = clrRed;
 
 const string ButtonTextPaused   = "Paused";
 const int    ButtonColourPaused = clrBlueViolet;
+
+void DrawDateTimeLabel() {
+    string labelName = "DATETIME_LABEL";
+
+    // Get current time
+    datetime    currentTime = TimeCurrent();
+    MqlDateTime timeStruct;
+    TimeToStruct(currentTime, timeStruct);
+
+    string dayNames[]   = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
+    string dayOfWeek    = dayNames[timeStruct.day_of_week];
+    string timeString   = TimeToString(currentTime, TIME_SECONDS);
+    string dateTimeText = dayOfWeek + " " + timeString;
+
+    ObjectDelete(0, labelName);
+    ObjectCreate(0, labelName, OBJ_LABEL, 0, 0, 0);
+    ObjectSetInteger(0, labelName, OBJPROP_XDISTANCE, ButtonXPosition);
+    ObjectSetInteger(0, labelName, OBJPROP_YDISTANCE, ButtonYPosition - 50);
+    ObjectSetInteger(0, labelName, OBJPROP_CORNER, ButtonCorner);
+    ObjectSetString(0, labelName, OBJPROP_TEXT, dateTimeText);
+    ObjectSetString(0, labelName, OBJPROP_FONT, ButtonFont);
+    ObjectSetInteger(0, labelName, OBJPROP_FONTSIZE, ButtonFontSize);
+    ObjectSetInteger(0, labelName, OBJPROP_COLOR, clrWhite);
+}
 
 void DrawPauseButton() {
     Print("Draw Pause/Play button begin");
@@ -68,8 +92,6 @@ int ButtonColour() {
 
 bool RefreshButton(string &sparam, int &id) {
 
-    PrintFormat("Refresh Pause/Play button");
-
     bool returnVal = false;
 
     if(sparam != ButtonName)
@@ -80,6 +102,8 @@ bool RefreshButton(string &sparam, int &id) {
 
     returnVal = true;
     SetButtonState(ObjectGetInteger(0, ButtonName, OBJPROP_STATE, 0));
+
+    PrintFormat("Refresh Pause/Play button, new state: " + (string)ButtonState);
 
     return returnVal;
 }
