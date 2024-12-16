@@ -9,7 +9,7 @@
 #property description "A strategy using two Momentums and EMAs"
 #property description "https://youtu.be/deBLPlt8N4E"
 
-#include <EAUtils.mqh>
+#include <Geraked/EAUtils.mqh>
 
 input group "Indicator Parameters"
 input int FastPeriod = 10; // Fast Period

@@ -9,13 +9,13 @@
 #property description "A strategy using Average Force, Andean Oscillator, and MACD"
 #property description "NZDCAD-30M  2019.01.01 - 2023.10.22"
 
-#include <EAUtils.mqh>
+#include <Geraked\EAUtils.mqh>
 
-#define PATH_AF "Indicators\\AverageForce.ex5"
+#define PATH_AF "Indicators\\Geraked\\AverageForce.ex5"
 #define I_AF "::" + PATH_AF
 #resource "\\" + PATH_AF
 
-#define PATH_AOS "Indicators\\AndeanOscillator.ex5"
+#define PATH_AOS "Indicators\\Geraked\\AndeanOscillator.ex5"
 #define I_AOS "::" + PATH_AOS
 #resource "\\" + PATH_AOS
 enum ENUM_AOS_BI {

@@ -9,7 +9,7 @@
 #property description "A strategy using Daily High/Low and Andean Oscillator indicators for scalping"
 #property description "AUDUSD-5M  2021.02.22 - 2023.09.19"
 
-#include <EAUtils.mqh>
+#include <Geraked\EAUtils.mqh>
 
 input group "Indicator Parameters"
 input int AosPeriod = 50; // AOS Period
@@ -63,13 +63,13 @@ datetime lastCandle;
 datetime tc;
 int BuffSize;
 
-#define PATH_AOS "Indicators\\AndeanOscillator.ex5"
+#define PATH_AOS "Indicators\\Geraked\\AndeanOscillator.ex5"
 #define I_AOS "::" + PATH_AOS
 #resource "\\" + PATH_AOS
 int AOS_handle;
 double AOS_Bull[], AOS_Bear[], AOS_Signal[];
 
-#define PATH_DHL "Indicators\\DailyHighLow.ex5"
+#define PATH_DHL "Indicators\\Geraked\\DailyHighLow.ex5"
 #define I_DHL "::" + PATH_DHL
 #resource "\\" + PATH_DHL
 int DHL_handle;

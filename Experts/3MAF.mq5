@@ -9,7 +9,7 @@
 #property description "A simple strategy using three Moving Averages and Williams Fractals"
 #property description "USDCAD-15M  2021.02.22 - 2023.09.08"
 
-#include <EAUtils.mqh>
+#include <Geraked\EAUtils.mqh>
 
 input group "Indicator Parameters"
 input int MA1Len = 60; // MA1 Period

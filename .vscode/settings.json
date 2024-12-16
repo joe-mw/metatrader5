@@ -1,0 +1,17 @@
+{
+    "files.associations": {
+        "*.html": "html",
+        "*.js": "javascript",
+        "*.json": "json",
+        "*.md": "markdown",
+        "*.py": "python",
+        "*.txt": "text",
+        "*.b": "mvbasic",
+        "*.mq5": "cpp",
+        "*.mqh": "cpp"
+    },
+    "C_Cpp.default.includePath": [
+        "c:\\Users\\jkihiu\\AppData\\Roaming\\MetaQuotes\\Terminal\\FF4D99A09CC0314C66F3B35714902402\\MQL5\\Include\\Include"
+    ],
+    "C_Cpp.clang_format_style": "file:c:\\Users\\jkihiu\\.vscode\\extensions\\l-i-v.mql-tools-2.1.0\\files\\.clang-format"
+}

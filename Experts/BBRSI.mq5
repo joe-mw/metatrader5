@@ -9,7 +9,7 @@
 #property description "A strategy using Bollinger Bands and RSI"
 #property description "XAUUSD-5M  2021.02.26 - 2023.09.15"
 
-#include <EAUtils.mqh>
+#include <Geraked\EAUtils.mqh>
 
 input group "Indicator Parameters"
 input int BBLen = 500; // BB Period

@@ -9,7 +9,7 @@
 #property description "A strategy using Linear Regression Candles and UT Bot Alerts"
 #property description "AUDCAD-15M  2019.01.01 - 2023.10.30"
 
-#include <EAUtils.mqh>
+#include <Geraked\EAUtils.mqh>
 
 input group "Indicator Parameters"
 input int LrLen = 11; // LRC Period
@@ -65,13 +65,13 @@ datetime lastCandle;
 datetime tc;
 int BuffSize;
 
-#define PATH_LRC "Indicators\\LinearRegressionCandles.ex5"
+#define PATH_LRC "Indicators\\Geraked\\LinearRegressionCandles.ex5"
 #define I_LRC "::" + PATH_LRC
 #resource "\\" + PATH_LRC
 int LRC_handle;
 double LRC_O[], LRC_C[], LRC_S[];
 
-#define PATH_UTB "Indicators\\UTBot.ex5"
+#define PATH_UTB "Indicators\\Geraked\\UTBot.ex5"
 #define I_UTB "::" + PATH_UTB
 #resource "\\" + PATH_UTB
 int UTB_handle;

@@ -9,13 +9,13 @@
 #property description "A strategy using Nadaraya-Watson Envelope, RSI, and ATR Stop Loss Finder indicators"
 #property description "Multiple Symbols(USDCAD, AUDUSD, EURCHF)-2H  2019.01.01 - 2023.10.22"
 
-#include <EAUtils.mqh>
+#include <Geraked\EAUtils.mqh>
 
-#define PATH_ASF "Indicators\\AtrSlFinder.ex5"
+#define PATH_ASF "Indicators\\Geraked\\AtrSlFinder.ex5"
 #define I_ASF "::" + PATH_ASF
 #resource "\\" + PATH_ASF
 
-#define PATH_NWE "Indicators\\NadarayaWatsonEnvelope.ex5"
+#define PATH_NWE "Indicators\\Geraked\\NadarayaWatsonEnvelope.ex5"
 #define I_NWE "::" + PATH_NWE
 #resource "\\" + PATH_NWE
 

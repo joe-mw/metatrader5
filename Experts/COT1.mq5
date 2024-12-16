@@ -9,11 +9,11 @@
 #property description "A strategy using Commitments of Traders (COT) and Super Trend indicator"
 #property description "Multiple Symbols-Daily  2021.01.01 - 2024.01.14"
 
-#include <EAUtils.mqh>
-#include <Cot.mqh>
-#include <Sql.mqh>
+#include <Geraked\EAUtils.mqh>
+#include <Geraked\Cot.mqh>
+#include <Geraked\Sql.mqh>
 
-#define PATH_ST "Indicators\\SuperTrend.ex5"
+#define PATH_ST "Indicators\\Geraked\\SuperTrend.ex5"
 #define I_ST "::" + PATH_ST
 #resource "\\" + PATH_ST
 

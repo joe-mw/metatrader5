@@ -9,7 +9,7 @@
 #property description "A Strategy Using Chandelier Exit and ZLSMA Indicators Based on the Heikin Ashi Candles"
 #property description "AUDUSD-15M  2019.01.01 - 2023.08.01"
 
-#include <EAUtils.mqh>
+#include <Geraked/EAUtils.mqh>
 
 input group "Indicator Parameters"
 input int CeAtrPeriod = 1; // CE ATR Period
@@ -66,13 +66,13 @@ datetime tc;
 int HA_handle;
 double HA_C[];
 
-#define PATH_CE "Indicators\\ChandelierExit.ex5"
+#define PATH_CE "Indicators\\Geraked\\ChandelierExit.ex5"
 #define I_CE "::" + PATH_CE
 #resource "\\" + PATH_CE
 int CE_handle;
 double CE_B[], CE_S[];
 
-#define PATH_ZL "Indicators\\ZLSMA.ex5"
+#define PATH_ZL "Indicators\\Geraked\\ZLSMA.ex5"
 #define I_ZL "::" + PATH_ZL
 #resource "\\" + PATH_ZL
 int ZL_handle;

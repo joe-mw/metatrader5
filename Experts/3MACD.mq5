@@ -9,7 +9,7 @@
 #property description "A strategy using triple MACDs for scalping"
 #property description "AUDUSD-5M  2021.02.22 - 2023.09.26"
 
-#include <EAUtils.mqh>
+#include <Geraked/EAUtils.mqh>
 
 input group "Indicator Parameters"
 input int M1Fast = 5; // MACD1 Fast
