@@ -127,7 +127,7 @@ class UIHandler {
         ObjectSetInteger(0, m_pauseButtonName, OBJPROP_COLOR, m_buttonTextColor);
         ObjectSetInteger(0, m_pauseButtonName, OBJPROP_BORDER_COLOR, m_buttonBorderColor);
 
-        UpdatePauseButton();
+        SetPauseTradingButtonState(m_isTradingActive);
     }
 
     void DrawPauseBuyButton() {
@@ -147,7 +147,7 @@ class UIHandler {
         ObjectSetInteger(0, m_buyButtonName, OBJPROP_BORDER_COLOR, m_iconBorderColor);
         ObjectSetString(0, m_buyButtonName, OBJPROP_TEXT, "▲");
 
-        UpdateBuyButton();
+        SetPauseBuyButtonState(m_isBuyActive);
     }
 
     void DrawPauseSellButton() {
@@ -167,7 +167,7 @@ class UIHandler {
         ObjectSetInteger(0, m_sellButtonName, OBJPROP_BORDER_COLOR, m_iconBorderColor);
         ObjectSetString(0, m_sellButtonName, OBJPROP_TEXT, "▼");
 
-        UpdateSellButton();
+        SetPauseBuyButtonState(m_isSellActive);
     }
 
     bool Render(const string &sparam, const int &id) {
@@ -177,22 +177,19 @@ class UIHandler {
         }
 
         if(sparam == m_pauseButtonName) {
-            m_isTradingActive = !m_isTradingActive;
-            UpdatePauseButton();
+            SetPauseTradingButtonState(ObjectGetInteger(0, m_pauseButtonName, OBJPROP_STATE, 0));
             PrintFormat("Main Pause/Play button toggled. New state: " + (string)m_isTradingActive);
             return true;
         }
 
         if(sparam == m_buyButtonName) {
-            m_isBuyActive = !m_isBuyActive;
-            UpdateBuyButton();
+            SetPauseBuyButtonState(ObjectGetInteger(0, m_buyButtonName, OBJPROP_STATE, 0));
             PrintFormat("Pause Buy button toggled. New state: " + (string)m_isBuyActive);
             return true;
         }
 
         if(sparam == m_sellButtonName) {
-            m_isSellActive = !m_isSellActive;
-            UpdateSellButton();
+            SetPauseSellButtonState(ObjectGetInteger(0, m_sellButtonName, OBJPROP_STATE, 0));
             PrintFormat("Pause Sell button toggled. New state: " + (string)m_isSellActive);
             return true;
         }
@@ -201,22 +198,35 @@ class UIHandler {
     }
 
     // Getters and Setters for Button States
-    bool GetTradingState() const { return m_isTradingActive; }
+    bool GetTradingState() {
+        if((bool)MQLInfoInteger(MQL_TESTER) && (bool)MQLInfoInteger(MQL_VISUAL_MODE)) {
+            SetPauseTradingButtonState(ObjectGetInteger(0, m_pauseButtonName, OBJPROP_STATE, 0));
+        }
+        return m_isTradingActive;
+    }
     void SetTradingState(bool state) {
         m_isTradingActive = state;
-        UpdatePauseButton();
     }
 
-    bool GetBuyState() const { return m_isBuyActive; }
+    bool GetBuyState() {
+        if((bool)MQLInfoInteger(MQL_TESTER) && (bool)MQLInfoInteger(MQL_VISUAL_MODE)) {
+            SetPauseBuyButtonState(ObjectGetInteger(0, m_buyButtonName, OBJPROP_STATE, 0));
+        }
+        return m_isBuyActive;
+    }
     void SetBuyState(bool state) {
         m_isBuyActive = state;
-        UpdateBuyButton();
     }
 
-    bool GetSellState() const { return m_isSellActive; }
+    bool GetSellState() {
+        if((bool)MQLInfoInteger(MQL_TESTER) && (bool)MQLInfoInteger(MQL_VISUAL_MODE)) {
+            SetPauseSellButtonState(ObjectGetInteger(0, m_sellButtonName, OBJPROP_STATE, 0));
+        }
+        return m_isSellActive;
+    }
+
     void SetSellState(bool state) {
         m_isSellActive = state;
-        UpdateSellButton();
     }
 
     // Delete all/Clean up
@@ -230,7 +240,8 @@ class UIHandler {
 
   private:
     // Update Button States
-    void UpdatePauseButton() {
+    void SetPauseTradingButtonState(bool state) {
+        m_isTradingActive = state;
         if(ObjectFind(0, m_pauseButtonName) >= 0) {
             ObjectSetInteger(0, m_pauseButtonName, OBJPROP_STATE, m_isTradingActive);
             ObjectSetString(0, m_pauseButtonName, OBJPROP_TEXT, (m_isTradingActive ? m_buttonTextRunning : m_buttonTextPaused));
@@ -238,14 +249,16 @@ class UIHandler {
         }
     }
 
-    void UpdateBuyButton() {
+    void SetPauseBuyButtonState(bool state) {
+        m_isBuyActive = state;
         if(ObjectFind(0, m_buyButtonName) >= 0) {
             ObjectSetInteger(0, m_buyButtonName, OBJPROP_STATE, m_isBuyActive);
             ObjectSetInteger(0, m_buyButtonName, OBJPROP_BGCOLOR, (m_isBuyActive ? clrGreen : clrGray));
         }
     }
 
-    void UpdateSellButton() {
+    void SetPauseSellButtonState(bool state) {
+        m_isSellActive = state;
         if(ObjectFind(0, m_sellButtonName) >= 0) {
             ObjectSetInteger(0, m_sellButtonName, OBJPROP_STATE, m_isSellActive);
             ObjectSetInteger(0, m_sellButtonName, OBJPROP_BGCOLOR, (m_isSellActive ? clrRed : clrGray));

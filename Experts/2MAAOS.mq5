@@ -219,6 +219,10 @@ void OnTimer() {
     if(Grid)
         ea.CheckForGrid();
 
+    ui.GetTradingState();
+    ui.GetBuyState();
+    ui.GetSellState();
+
     // To Control events using the Pause Button
     if(!ui.GetTradingState())
         return;
