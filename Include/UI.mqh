@@ -174,7 +174,7 @@ class UIHandler {
         SetPauseSellButtonState(m_isSellActive);
     }
 
-    // Strategy tester doesn't care about this at all, only live chart cares about this
+    // USED IN LIVE CHART, NOT USED IN STRATEGY TESTER AT ALL
     bool Render(const string &sparam, const int &id) {
         if(id != CHARTEVENT_OBJECT_CLICK) {
             Print("Event is not an object click. Exiting RefreshButtons.");
@@ -222,7 +222,7 @@ class UIHandler {
         return false;
     }
 
-    // Updated getters to ensure consistent behavior in tester mode
+    // USED IN STRATEGY TESTER, NOT USED IN LIVE CHART AT ALL
     bool GetTradingState() {
 
         // In tester mode, allow manual override

@@ -95,7 +95,11 @@ double AOS(string symbol, ENUM_AOS_BI bi = 0, int i = -1) {
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
-void CheckForSignal() {
+void CheckForSignal(bool couldBuy, bool couldSell) {
+
+    Print("Could Buy: " + couldBuy);
+    Print("Could Sell: " + couldSell);
+
     if(!OpenNewPos)
         return;
     if(MarginLimit && PositionsTotal() > 0 && AccountInfoDouble(ACCOUNT_MARGIN_LEVEL) < MarginLimit)
@@ -133,7 +137,7 @@ void CheckForSignal() {
         bc = bc && Ask(s) > fma1 - 0.5 * diff;
         sc = sc && Bid(s) < fma1 + 0.5 * diff;
 
-        if(bc && ui.GetBuyState()) {
+        if(bc && (Reverse ? couldSell : couldBuy)) {
             double in = Ask(s);
             double sl = BuySL(SLType, SLLookback, in, SLDev, 0, s);
             double tp = in + TPCoef * MathAbs(in - sl);
@@ -141,7 +145,7 @@ void CheckForSignal() {
             Sleep(5000);
         }
 
-        else if(sc && ui.GetSellState()) {
+        else if(sc && (Reverse ? couldBuy : couldSell)) {
             double in = Bid(s);
             double sl = SellSL(SLType, SLLookback, in, SLDev, 0, s);
             double tp = in - TPCoef * MathAbs(in - sl);
@@ -221,17 +225,19 @@ void OnTimer() {
 
     bool isTesterMode = (bool)MQLInfoInteger(MQL_TESTER) && (bool)MQLInfoInteger(MQL_VISUAL_MODE);
 
-    if(isTesterMode) {
-        ObjectSetInteger(0, "BUTTON_PAUSE", OBJPROP_STATE, ui.GetTradingState());
-        ObjectSetInteger(0, "BUTTON_PAUSE_BUY", OBJPROP_STATE, ui.GetBuyState());
-        ObjectSetInteger(0, "BUTTON_PAUSE_SELL", OBJPROP_STATE, ui.GetSellState());
-    }
+    // if(isTesterMode) {
+
+    ObjectSetInteger(0, "BUTTON_PAUSE", OBJPROP_STATE, ui.GetTradingState());
+    ObjectSetInteger(0, "BUTTON_PAUSE_BUY", OBJPROP_STATE, ui.GetBuyState());
+    ObjectSetInteger(0, "BUTTON_PAUSE_SELL", OBJPROP_STATE, ui.GetSellState());
+
+    // }
 
     // To Control events using the Pause Button
     if(!ui.GetTradingState())
         return;
 
-    CheckForSignal();
+    CheckForSignal(ui.GetBuyState(), ui.GetSellState());
 }
 
 // To update Pause Button
