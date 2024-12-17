@@ -53,9 +53,9 @@ class UIHandler {
         m_dateLabelName = "DATETIME_LABEL";
 
         // Main Pause/Play Button properties
-        m_isTradingActive      = false;   // true = trading on
+        m_isTradingActive      = true;   // true = trading on
         m_pauseButtonName      = "BUTTON_PAUSE";
-        m_pauseButtonXPosition = 310;
+        m_pauseButtonXPosition = 330;
         m_pauseButtonYPosition = 100;
         m_pauseButtonWidth     = 130;
         m_pauseButtonHeight    = 50;
@@ -140,7 +140,7 @@ class UIHandler {
         ObjectCreate(0, m_buyButtonName, OBJ_BUTTON, 0, 0, 0);
         // ObjectSetInteger(0, m_buyButtonName, OBJPROP_XDISTANCE, m_pauseButtonXPosition);
         // ObjectSetInteger(0, m_buyButtonName, OBJPROP_YDISTANCE, m_pauseButtonYPosition + m_pauseButtonHeight + 10);
-        ObjectSetInteger(0, m_buyButtonName, OBJPROP_XDISTANCE, 150);
+        ObjectSetInteger(0, m_buyButtonName, OBJPROP_XDISTANCE, m_pauseButtonXPosition - 160);
         ObjectSetInteger(0, m_buyButtonName, OBJPROP_YDISTANCE, 100);
         ObjectSetInteger(0, m_buyButtonName, OBJPROP_XSIZE, m_iconWidth);
         ObjectSetInteger(0, m_buyButtonName, OBJPROP_YSIZE, m_iconHeight);
@@ -160,7 +160,7 @@ class UIHandler {
         ObjectCreate(0, m_sellButtonName, OBJ_BUTTON, 0, 0, 0);
         // ObjectSetInteger(0, m_sellButtonName, OBJPROP_XDISTANCE, m_pauseButtonXPosition);
         // ObjectSetInteger(0, m_sellButtonName, OBJPROP_YDISTANCE, m_pauseButtonYPosition + (m_pauseButtonHeight + 10) * 2);
-        ObjectSetInteger(0, m_sellButtonName, OBJPROP_XDISTANCE, 70);
+        ObjectSetInteger(0, m_sellButtonName, OBJPROP_XDISTANCE, m_pauseButtonXPosition - 240);
         ObjectSetInteger(0, m_sellButtonName, OBJPROP_YDISTANCE, 100);
         ObjectSetInteger(0, m_sellButtonName, OBJPROP_XSIZE, m_iconWidth);
         ObjectSetInteger(0, m_sellButtonName, OBJPROP_YSIZE, m_iconHeight);
@@ -284,7 +284,7 @@ class UIHandler {
             ObjectSetInteger(0, m_pauseButtonName, OBJPROP_BGCOLOR, (m_isTradingActive ? m_buttonColorRunning : m_buttonColorPaused));
         }
 
-        ChartRedraw();   // after updating UI properties
+        ChartRedraw(0);   // after updating UI properties
     }
 
     void SetPauseBuyButtonState(bool state) {
@@ -293,7 +293,7 @@ class UIHandler {
             ObjectSetInteger(0, m_buyButtonName, OBJPROP_STATE, m_isBuyActive);
             ObjectSetInteger(0, m_buyButtonName, OBJPROP_BGCOLOR, (m_isBuyActive ? clrGreen : clrGray));
         }
-        ChartRedraw();   // after updating UI properties
+        ChartRedraw(0);   // after updating UI properties
     }
 
     void SetPauseSellButtonState(bool state) {
@@ -302,6 +302,6 @@ class UIHandler {
             ObjectSetInteger(0, m_sellButtonName, OBJPROP_STATE, m_isSellActive);
             ObjectSetInteger(0, m_sellButtonName, OBJPROP_BGCOLOR, (m_isSellActive ? clrRed : clrGray));
         }
-        ChartRedraw();   // after updating UI properties
+        ChartRedraw(0);   // after updating UI properties
     }
 };
