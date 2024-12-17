@@ -174,9 +174,8 @@ class UIHandler {
         SetPauseSellButtonState(m_isSellActive);
     }
 
+    // Strategy tester doesn't care about this at all, only live chart cares about this
     bool Render(const string &sparam, const int &id) {
-        // Enhanced handling for strategy tester
-
         if(id != CHARTEVENT_OBJECT_CLICK) {
             Print("Event is not an object click. Exiting RefreshButtons.");
             return false;
@@ -184,41 +183,40 @@ class UIHandler {
 
         if(sparam == m_pauseButtonName) {
             m_isTradingActive = !m_isTradingActive;
+
+            if(!m_isTradingActive) {
+                // If pausing, also pause buy and sell buttons
+                m_isBuyActive  = false;
+                m_isSellActive = false;
+            }
+
             SetPauseTradingButtonState(m_isTradingActive);
+
+            if(!m_isTradingActive) {
+                // Only update buy and sell buttons if trading is paused
+                SetPauseBuyButtonState(m_isBuyActive);
+                SetPauseSellButtonState(m_isSellActive);
+            }
+
             PrintFormat("Main Pause/Play button toggled. New state: " + (string)m_isTradingActive);
-
-            // Force update in tester mode
-            // if(isTesterMode) {
-            //     ObjectSetInteger(0, m_pauseButtonName, OBJPROP_STATE, !m_isTradingActive);
-            // }
-
             return true;
         }
 
-        if(sparam == m_buyButtonName) {
-            m_isBuyActive = !m_isBuyActive;
-            SetPauseBuyButtonState(m_isBuyActive);
-            PrintFormat("Pause Buy button toggled. New state: " + (string)m_isBuyActive);
+        // Only allow toggling buy/sell buttons if trading is active
+        if(m_isTradingActive) {
+            if(sparam == m_buyButtonName) {
+                m_isBuyActive = !m_isBuyActive;
+                SetPauseBuyButtonState(m_isBuyActive);
+                PrintFormat("Pause Buy button toggled. New state: " + (string)m_isBuyActive);
+                return true;
+            }
 
-            // Force update in tester mode
-            // if(isTesterMode) {
-            //     ObjectSetInteger(0, m_buyButtonName, OBJPROP_STATE, !m_isBuyActive);
-            // }
-
-            return true;
-        }
-
-        if(sparam == m_sellButtonName) {
-            m_isSellActive = !m_isSellActive;
-            SetPauseSellButtonState(m_isSellActive);
-            PrintFormat("Pause Sell button toggled. New state: " + (string)m_isSellActive);
-
-            // Force update in tester mode
-            // if(isTesterMode) {
-            //     ObjectSetInteger(0, m_sellButtonName, OBJPROP_STATE, !m_isSellActive);
-            // }
-
-            return true;
+            if(sparam == m_sellButtonName) {
+                m_isSellActive = !m_isSellActive;
+                SetPauseSellButtonState(m_isSellActive);
+                PrintFormat("Pause Sell button toggled. New state: " + (string)m_isSellActive);
+                return true;
+            }
         }
 
         return false;
@@ -285,6 +283,7 @@ class UIHandler {
             ObjectSetString(0, m_pauseButtonName, OBJPROP_TEXT, (m_isTradingActive ? m_buttonTextRunning : m_buttonTextPaused));
             ObjectSetInteger(0, m_pauseButtonName, OBJPROP_BGCOLOR, (m_isTradingActive ? m_buttonColorRunning : m_buttonColorPaused));
         }
+
         ChartRedraw();   // after updating UI properties
     }
 
