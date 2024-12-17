@@ -440,8 +440,22 @@ class UIHandler {
         // In tester mode, allow manual override of start time
         if(isTesterMode) {
             if(dayIndex >= 0 && dayIndex < 5 && ObjectFind(0, m_dayStartTimeInputNames[dayIndex]) >= 0) {
-                datetime newStartTime = StringToTime(ObjectGetString(0, m_dayStartTimeInputNames[dayIndex], OBJPROP_TEXT));
-                SetDayTradingTimes(dayIndex, newStartTime, m_dayEndTimes[dayIndex]);
+                string currentText = ObjectGetString(0, m_dayStartTimeInputNames[dayIndex], OBJPROP_TEXT);
+
+                // If the text is empty, revert to the stored time
+                if(currentText == "") {
+                    ObjectSetString(0, m_dayStartTimeInputNames[dayIndex], OBJPROP_TEXT,
+                                    TimeToString(m_dayStartTimes[dayIndex], TIME_MINUTES));
+                    return m_dayStartTimes[dayIndex];
+                }
+
+                datetime newStartTime = StringToTime(currentText);
+
+                // Validate the time conversion
+                if(newStartTime > 0) {
+                    SetDayTradingTimes(dayIndex, newStartTime, m_dayEndTimes[dayIndex]);
+                    return newStartTime;
+                }
             }
         }
 
@@ -454,8 +468,22 @@ class UIHandler {
         // In tester mode, allow manual override of end time
         if(isTesterMode) {
             if(dayIndex >= 0 && dayIndex < 5 && ObjectFind(0, m_dayEndTimeInputNames[dayIndex]) >= 0) {
-                datetime newEndTime = StringToTime(ObjectGetString(0, m_dayEndTimeInputNames[dayIndex], OBJPROP_TEXT));
-                SetDayTradingTimes(dayIndex, m_dayStartTimes[dayIndex], newEndTime);
+                string currentText = ObjectGetString(0, m_dayEndTimeInputNames[dayIndex], OBJPROP_TEXT);
+
+                // If the text is empty, revert to the stored time
+                if(currentText == "") {
+                    ObjectSetString(0, m_dayEndTimeInputNames[dayIndex], OBJPROP_TEXT,
+                                    TimeToString(m_dayEndTimes[dayIndex], TIME_MINUTES));
+                    return m_dayEndTimes[dayIndex];
+                }
+
+                datetime newEndTime = StringToTime(currentText);
+
+                // Validate the time conversion
+                if(newEndTime > 0) {
+                    SetDayTradingTimes(dayIndex, m_dayStartTimes[dayIndex], newEndTime);
+                    return newEndTime;
+                }
             }
         }
 
@@ -494,6 +522,26 @@ class UIHandler {
             ObjectDelete(0, m_dayEndTimeInputNames[i]);
             ObjectDelete(0, m_dayTimeResetButtonNames[i]);
         }
+    }
+
+    // Enhanced method to handle time input changes
+    bool HandleTimeInputChanges(const string &sparam) {
+        for(int i = 0; i < 5; i++) {
+            if(sparam == m_dayStartTimeInputNames[i]) {
+                // Get the new time from the input
+                datetime newStartTime = StringToTime(ObjectGetString(0, sparam, OBJPROP_TEXT));
+                SetDayTradingTimes(i, newStartTime, m_dayEndTimes[i]);
+                return true;
+            }
+
+            if(sparam == m_dayEndTimeInputNames[i]) {
+                // Get the new time from the input
+                datetime newEndTime = StringToTime(ObjectGetString(0, sparam, OBJPROP_TEXT));
+                SetDayTradingTimes(i, m_dayStartTimes[i], newEndTime);
+                return true;
+            }
+        }
+        return false;
     }
 
     // Update day time for when trading is allowed
@@ -569,25 +617,5 @@ class UIHandler {
         }
         PrintFormat(m_dayButtonNames[dayIndex] + " toggled. New state: " + (string)state);
         ChartRedraw(0);
-    }
-
-    // Enhanced method to handle time input changes
-    bool HandleTimeInputChanges(const string &sparam) {
-        for(int i = 0; i < 5; i++) {
-            if(sparam == m_dayStartTimeInputNames[i]) {
-                // Get the new time from the input
-                datetime newStartTime = StringToTime(ObjectGetString(0, sparam, OBJPROP_TEXT));
-                SetDayTradingTimes(i, newStartTime, m_dayEndTimes[i]);
-                return true;
-            }
-
-            if(sparam == m_dayEndTimeInputNames[i]) {
-                // Get the new time from the input
-                datetime newEndTime = StringToTime(ObjectGetString(0, sparam, OBJPROP_TEXT));
-                SetDayTradingTimes(i, m_dayStartTimes[i], newEndTime);
-                return true;
-            }
-        }
-        return false;
     }
 };
