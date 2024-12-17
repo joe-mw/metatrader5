@@ -45,6 +45,18 @@ class UIHandler {
     int m_iconBorderColor;
     int m_iconTextColor;
 
+    // New Day Trading Controls
+    bool m_isDayTradingActive[5];
+
+    string m_dayNames[5];
+    string m_dayButtonNames[5];
+
+    datetime m_dayStartTimes[5];
+    string   m_dayStartTimeInputNames[5];
+
+    datetime m_dayEndTimes[5];
+    string   m_dayEndTimeInputNames[5];
+
   public:
     UIHandler() {
         isTesterMode = (bool)MQLInfoInteger(MQL_TESTER) && (bool)MQLInfoInteger(MQL_VISUAL_MODE);
@@ -57,11 +69,11 @@ class UIHandler {
         m_pauseButtonName      = "BUTTON_PAUSE";
         m_pauseButtonXPosition = 330;
         m_pauseButtonYPosition = 100;
-        m_pauseButtonWidth     = 130;
-        m_pauseButtonHeight    = 50;
+        m_pauseButtonWidth     = 100;
+        m_pauseButtonHeight    = 30;
         m_buttonCorner         = CORNER_RIGHT_UPPER;
         m_buttonFont           = "Comic Sans MS";
-        m_buttonFontSize       = 12;
+        m_buttonFontSize       = 9;
         m_buttonTextColor      = clrBlack;
         m_buttonBorderColor    = clrYellow;
 
@@ -80,10 +92,31 @@ class UIHandler {
         m_buttonColorPaused  = clrBlueViolet;
 
         // Icon properties
-        m_iconWidth       = 60;
+        m_iconWidth       = 40;
         m_iconHeight      = m_pauseButtonHeight;
         m_iconBorderColor = clrYellow;
         m_iconTextColor   = clrWhite;
+
+        // Initialize day names
+        m_dayNames[0] = "Mon";
+        m_dayNames[1] = "Tue";
+        m_dayNames[2] = "Wed";
+        m_dayNames[3] = "Thur";
+        m_dayNames[4] = "Fri";
+
+        // Initialize day trading state (all days active by default)
+        for(int i = 0; i < 5; i++) {
+            m_isDayTradingActive[i] = true;
+
+            // Create day button names
+            m_dayButtonNames[i]         = "DAY_BUTTON_" + m_dayNames[i];
+            m_dayStartTimeInputNames[i] = "START_TIME_INPUT_" + m_dayNames[i];
+            m_dayEndTimeInputNames[i]   = "END_TIME_INPUT_" + m_dayNames[i];
+
+            // Set default start and end times (example times)
+            m_dayStartTimes[i] = StringToTime("04:00");
+            m_dayEndTimes[i]   = StringToTime("18:00");
+        }
 
         // Timestamp label
         DrawDateTimeLabel();
@@ -92,6 +125,10 @@ class UIHandler {
         DrawPauseTradingStateButton();
         DrawPauseBuyButton();
         DrawPauseSellButton();
+
+        // Day time controls
+        DrawDayButtons();
+        DrawDayTimeInputFields();
     }
 
     void DrawDateTimeLabel() {
@@ -140,7 +177,7 @@ class UIHandler {
         ObjectCreate(0, m_buyButtonName, OBJ_BUTTON, 0, 0, 0);
         // ObjectSetInteger(0, m_buyButtonName, OBJPROP_XDISTANCE, m_pauseButtonXPosition);
         // ObjectSetInteger(0, m_buyButtonName, OBJPROP_YDISTANCE, m_pauseButtonYPosition + m_pauseButtonHeight + 10);
-        ObjectSetInteger(0, m_buyButtonName, OBJPROP_XDISTANCE, m_pauseButtonXPosition - 160);
+        ObjectSetInteger(0, m_buyButtonName, OBJPROP_XDISTANCE, m_pauseButtonXPosition - 140);
         ObjectSetInteger(0, m_buyButtonName, OBJPROP_YDISTANCE, 100);
         ObjectSetInteger(0, m_buyButtonName, OBJPROP_XSIZE, m_iconWidth);
         ObjectSetInteger(0, m_buyButtonName, OBJPROP_YSIZE, m_iconHeight);
@@ -174,8 +211,92 @@ class UIHandler {
         SetPauseSellButtonState(m_isSellActive);
     }
 
-    // USED IN LIVE CHART, NOT USED IN STRATEGY TESTER AT ALL
+    void DrawDayButtons() {
+        for(int i = 0; i < 5; i++) {
+            ObjectDelete(0, m_dayButtonNames[i]);
+            ObjectCreate(0, m_dayButtonNames[i], OBJ_BUTTON, 0, 0, 0);
+
+            // Position buttons below existing controls
+            ObjectSetInteger(0, m_dayButtonNames[i], OBJPROP_XDISTANCE, m_pauseButtonXPosition);
+            ObjectSetInteger(0, m_dayButtonNames[i], OBJPROP_YDISTANCE, 100 + (m_pauseButtonHeight * (i + 2)));
+            ObjectSetString(0, m_dayButtonNames[i], OBJPROP_FONT, m_buttonFont);
+            ObjectSetInteger(0, m_dayButtonNames[i], OBJPROP_FONTSIZE, m_buttonFontSize);
+            ObjectSetInteger(0, m_dayButtonNames[i], OBJPROP_XSIZE, 100);
+            ObjectSetInteger(0, m_dayButtonNames[i], OBJPROP_YSIZE, m_pauseButtonHeight);
+            ObjectSetInteger(0, m_dayButtonNames[i], OBJPROP_CORNER, m_buttonCorner);
+            ObjectSetString(0, m_dayButtonNames[i], OBJPROP_TEXT, m_dayNames[i]);
+            SetDayButtonState(i, m_isDayTradingActive[i]);
+        }
+    }
+
+    void DrawDayTimeInputFields() {
+        for(int i = 0; i < 5; i++) {
+            // Start Time Input
+            ObjectDelete(0, m_dayStartTimeInputNames[i]);
+            ObjectCreate(0, m_dayStartTimeInputNames[i], OBJ_EDIT, 0, 0, 0);
+            ObjectSetInteger(0, m_dayStartTimeInputNames[i], OBJPROP_XDISTANCE, m_pauseButtonXPosition - 120);
+            ObjectSetInteger(0, m_dayStartTimeInputNames[i], OBJPROP_YDISTANCE, 100 + (m_pauseButtonHeight * (i + 2)));
+            ObjectSetInteger(0, m_dayStartTimeInputNames[i], OBJPROP_XSIZE, 80);
+            ObjectSetInteger(0, m_dayStartTimeInputNames[i], OBJPROP_YSIZE, m_pauseButtonHeight);
+            ObjectSetInteger(0, m_dayStartTimeInputNames[i], OBJPROP_CORNER, m_buttonCorner);
+            ObjectSetString(0, m_dayStartTimeInputNames[i], OBJPROP_FONT, m_buttonFont);
+            ObjectSetInteger(0, m_dayStartTimeInputNames[i], OBJPROP_FONTSIZE, m_buttonFontSize);
+            ObjectSetInteger(0, m_dayStartTimeInputNames[i], OBJPROP_COLOR, m_iconTextColor);
+            ObjectSetString(0, m_dayStartTimeInputNames[i], OBJPROP_TEXT, TimeToString(m_dayStartTimes[i], TIME_MINUTES));
+
+            // End Time Input
+            ObjectDelete(0, m_dayEndTimeInputNames[i]);
+            ObjectCreate(0, m_dayEndTimeInputNames[i], OBJ_EDIT, 0, 0, 0);
+            ObjectSetInteger(0, m_dayEndTimeInputNames[i], OBJPROP_XDISTANCE, m_pauseButtonXPosition - 220);
+            ObjectSetInteger(0, m_dayEndTimeInputNames[i], OBJPROP_YDISTANCE, 100 + (m_pauseButtonHeight * (i + 2)));
+            ObjectSetInteger(0, m_dayEndTimeInputNames[i], OBJPROP_XSIZE, 80);
+            ObjectSetInteger(0, m_dayEndTimeInputNames[i], OBJPROP_YSIZE, m_pauseButtonHeight);
+            ObjectSetInteger(0, m_dayEndTimeInputNames[i], OBJPROP_CORNER, m_buttonCorner);
+            ObjectSetString(0, m_dayEndTimeInputNames[i], OBJPROP_FONT, m_buttonFont);
+            ObjectSetInteger(0, m_dayEndTimeInputNames[i], OBJPROP_FONTSIZE, m_buttonFontSize);
+            ObjectSetInteger(0, m_dayEndTimeInputNames[i], OBJPROP_COLOR, m_iconTextColor);
+            ObjectSetString(0, m_dayEndTimeInputNames[i], OBJPROP_TEXT, TimeToString(m_dayEndTimes[i], TIME_MINUTES));
+        }
+    }
+
+    void SetDayButtonState(int dayIndex, bool state) {
+        if(dayIndex < 0 || dayIndex >= 5)
+            return;
+
+        m_isDayTradingActive[dayIndex] = state;
+        if(ObjectFind(0, m_dayButtonNames[dayIndex]) >= 0) {
+            ObjectSetInteger(0, m_dayButtonNames[dayIndex], OBJPROP_STATE, state);
+            ObjectSetInteger(0, m_dayButtonNames[dayIndex], OBJPROP_BGCOLOR, (state ? m_buttonColorRunning : clrBlueViolet));
+        }
+        ChartRedraw(0);
+    }
+
+    // Overload Render method to handle new day buttons
     bool Render(const string &sparam, const int &id) {
+        // First check existing parent method logic
+        bool baseResult = BaseRender(sparam, id);
+        if(baseResult)
+            return true;
+
+        // Check for day button clicks
+        for(int i = 0; i < 5; i++) {
+            if(sparam == m_dayButtonNames[i]) {
+                // Toggle day trading state
+                SetDayButtonState(i, !m_isDayTradingActive[i]);
+                return true;
+            }
+        }
+
+        // Check time input changes
+        if(HandleTimeInputChanges(sparam)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    // USED IN LIVE CHART, NOT USED IN STRATEGY TESTER AT ALL
+    bool BaseRender(const string &sparam, const int &id) {
         if(id != CHARTEVENT_OBJECT_CLICK) {
             Print("Event is not an object click. Exiting RefreshButtons.");
             return false;
@@ -265,13 +386,83 @@ class UIHandler {
         return m_isSellActive;
     }
 
+    // Getters for day trading states
+    bool IsDayTradingActive(int dayIndex) {
+        if(dayIndex < 0 || dayIndex >= 5)
+            return false;
+        return m_isDayTradingActive[dayIndex];
+    }
+
+    datetime GetDayStartTime(int dayIndex) {
+        if(dayIndex < 0 || dayIndex >= 5)
+            return 0;
+        return m_dayStartTimes[dayIndex];
+    }
+
+    datetime GetDayEndTime(int dayIndex) {
+        if(dayIndex < 0 || dayIndex >= 5)
+            return 0;
+        return m_dayEndTimes[dayIndex];
+    }
+
+    // Enhanced method to handle time input changes
+    bool HandleTimeInputChanges(const string &sparam) {
+        for(int i = 0; i < 5; i++) {
+            if(sparam == m_dayStartTimeInputNames[i]) {
+                // Get the new time from the input
+                datetime newStartTime = StringToTime(ObjectGetString(0, sparam, OBJPROP_TEXT));
+                SetDayTradingTimes(i, newStartTime, m_dayEndTimes[i]);
+                return true;
+            }
+
+            if(sparam == m_dayEndTimeInputNames[i]) {
+                // Get the new time from the input
+                datetime newEndTime = StringToTime(ObjectGetString(0, sparam, OBJPROP_TEXT));
+                SetDayTradingTimes(i, m_dayStartTimes[i], newEndTime);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // Additional method to set trading times (if needed)
+    void SetDayTradingTimes(int dayIndex, datetime startTime, datetime endTime) {
+        if(dayIndex < 0 || dayIndex >= 5)
+            return;
+
+        m_dayStartTimes[dayIndex] = startTime;
+        m_dayEndTimes[dayIndex]   = endTime;
+
+        // Update button texts
+        if(ObjectFind(0, m_dayStartTimeInputNames[dayIndex]) >= 0) {
+            ObjectSetString(0, m_dayStartTimeInputNames[dayIndex], OBJPROP_TEXT,
+                            TimeToString(startTime, TIME_MINUTES));
+        }
+        if(ObjectFind(0, m_dayEndTimeInputNames[dayIndex]) >= 0) {
+            ObjectSetString(0, m_dayEndTimeInputNames[dayIndex], OBJPROP_TEXT,
+                            TimeToString(endTime, TIME_MINUTES));
+        }
+
+        ChartRedraw(0);
+    }
+
     // Delete all/Clean up
-    void DeletePauseButtons() {
+    void DeleteButtons() {
+
         Print("Deleting UI items");
+
+        // Delete first row
         ObjectDelete(0, m_dateLabelName);
         ObjectDelete(0, m_pauseButtonName);
         ObjectDelete(0, m_buyButtonName);
         ObjectDelete(0, m_sellButtonName);
+
+        // Delete day buttons and time inputs
+        for(int i = 0; i < 5; i++) {
+            ObjectDelete(0, m_dayButtonNames[i]);
+            ObjectDelete(0, m_dayStartTimeInputNames[i]);
+            ObjectDelete(0, m_dayEndTimeInputNames[i]);
+        }
     }
 
   private:
