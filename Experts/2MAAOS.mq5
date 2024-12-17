@@ -219,9 +219,13 @@ void OnTimer() {
     if(Grid)
         ea.CheckForGrid();
 
-    ui.GetTradingState();
-    ui.GetBuyState();
-    ui.GetSellState();
+    bool isTesterMode = (bool)MQLInfoInteger(MQL_TESTER) && (bool)MQLInfoInteger(MQL_VISUAL_MODE);
+
+    if(isTesterMode) {
+        ObjectSetInteger(0, "BUTTON_PAUSE", OBJPROP_STATE, ui.GetTradingState());
+        ObjectSetInteger(0, "BUTTON_PAUSE_BUY", OBJPROP_STATE, ui.GetBuyState());
+        ObjectSetInteger(0, "BUTTON_PAUSE_SELL", OBJPROP_STATE, ui.GetSellState());
+    }
 
     // To Control events using the Pause Button
     if(!ui.GetTradingState())
@@ -234,6 +238,8 @@ void OnTimer() {
 void OnChartEvent(const int id, const long &lparam, const double &dparam, const string &sparam) {
     Print("\nChart Event");
     ui.Render(sparam, id);
+
+    ChartRedraw();   // after updating UI properties
 }
 
 void OnTick(void) {

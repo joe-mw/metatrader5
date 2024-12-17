@@ -7,6 +7,8 @@
 
 class UIHandler {
   private:
+    bool isTesterMode;
+
     // Datetime label
     string m_dateLabelName;
 
@@ -45,11 +47,13 @@ class UIHandler {
 
   public:
     UIHandler() {
+        isTesterMode = (bool)MQLInfoInteger(MQL_TESTER) && (bool)MQLInfoInteger(MQL_VISUAL_MODE);
+
         // Datetime label
         m_dateLabelName = "DATETIME_LABEL";
 
         // Main Pause/Play Button properties
-        m_isTradingActive      = true;   // true = trading on
+        m_isTradingActive      = false;   // true = trading on
         m_pauseButtonName      = "BUTTON_PAUSE";
         m_pauseButtonXPosition = 310;
         m_pauseButtonYPosition = 100;
@@ -171,62 +175,96 @@ class UIHandler {
     }
 
     bool Render(const string &sparam, const int &id) {
+        // Enhanced handling for strategy tester
+
         if(id != CHARTEVENT_OBJECT_CLICK) {
             Print("Event is not an object click. Exiting RefreshButtons.");
             return false;
         }
 
         if(sparam == m_pauseButtonName) {
-            SetPauseTradingButtonState(ObjectGetInteger(0, m_pauseButtonName, OBJPROP_STATE, 0));
+            m_isTradingActive = !m_isTradingActive;
+            SetPauseTradingButtonState(m_isTradingActive);
             PrintFormat("Main Pause/Play button toggled. New state: " + (string)m_isTradingActive);
+
+            // Force update in tester mode
+            // if(isTesterMode) {
+            //     ObjectSetInteger(0, m_pauseButtonName, OBJPROP_STATE, !m_isTradingActive);
+            // }
+
             return true;
         }
 
         if(sparam == m_buyButtonName) {
-            SetPauseBuyButtonState(ObjectGetInteger(0, m_buyButtonName, OBJPROP_STATE, 0));
+            m_isBuyActive = !m_isBuyActive;
+            SetPauseBuyButtonState(m_isBuyActive);
             PrintFormat("Pause Buy button toggled. New state: " + (string)m_isBuyActive);
+
+            // Force update in tester mode
+            // if(isTesterMode) {
+            //     ObjectSetInteger(0, m_buyButtonName, OBJPROP_STATE, !m_isBuyActive);
+            // }
+
             return true;
         }
 
         if(sparam == m_sellButtonName) {
-            SetPauseSellButtonState(ObjectGetInteger(0, m_sellButtonName, OBJPROP_STATE, 0));
+            m_isSellActive = !m_isSellActive;
+            SetPauseSellButtonState(m_isSellActive);
             PrintFormat("Pause Sell button toggled. New state: " + (string)m_isSellActive);
+
+            // Force update in tester mode
+            // if(isTesterMode) {
+            //     ObjectSetInteger(0, m_sellButtonName, OBJPROP_STATE, !m_isSellActive);
+            // }
+
             return true;
         }
 
         return false;
     }
 
-    // Getters and Setters for Button States
+    // Updated getters to ensure consistent behavior in tester mode
     bool GetTradingState() {
-        if((bool)MQLInfoInteger(MQL_TESTER) && (bool)MQLInfoInteger(MQL_VISUAL_MODE)) {
-            SetPauseTradingButtonState(ObjectGetInteger(0, m_pauseButtonName, OBJPROP_STATE, 0));
+
+        // In tester mode, allow manual override
+        if(isTesterMode) {
+            // Check if button exists and get its current state
+            if(ObjectFind(0, m_pauseButtonName) >= 0) {
+                m_isTradingActive = ObjectGetInteger(0, m_pauseButtonName, OBJPROP_STATE);
+                SetPauseTradingButtonState(m_isTradingActive);
+            }
         }
+
         return m_isTradingActive;
-    }
-    void SetTradingState(bool state) {
-        m_isTradingActive = state;
     }
 
     bool GetBuyState() {
-        if((bool)MQLInfoInteger(MQL_TESTER) && (bool)MQLInfoInteger(MQL_VISUAL_MODE)) {
-            SetPauseBuyButtonState(ObjectGetInteger(0, m_buyButtonName, OBJPROP_STATE, 0));
+
+        // In tester mode, allow manual override
+        if(isTesterMode) {
+            // Check if button exists and get its current state
+            if(ObjectFind(0, m_buyButtonName) >= 0) {
+                m_isBuyActive = ObjectGetInteger(0, m_buyButtonName, OBJPROP_STATE);
+                SetPauseBuyButtonState(m_isBuyActive);
+            }
         }
+
         return m_isBuyActive;
-    }
-    void SetBuyState(bool state) {
-        m_isBuyActive = state;
     }
 
     bool GetSellState() {
-        if((bool)MQLInfoInteger(MQL_TESTER) && (bool)MQLInfoInteger(MQL_VISUAL_MODE)) {
-            SetPauseSellButtonState(ObjectGetInteger(0, m_sellButtonName, OBJPROP_STATE, 0));
-        }
-        return m_isSellActive;
-    }
 
-    void SetSellState(bool state) {
-        m_isSellActive = state;
+        // In tester mode, allow manual override
+        if(isTesterMode) {
+            // Check if button exists and get its current state
+            if(ObjectFind(0, m_sellButtonName) >= 0) {
+                m_isSellActive = ObjectGetInteger(0, m_sellButtonName, OBJPROP_STATE);
+                SetPauseSellButtonState(m_isSellActive);
+            }
+        }
+
+        return m_isSellActive;
     }
 
     // Delete all/Clean up
@@ -247,6 +285,7 @@ class UIHandler {
             ObjectSetString(0, m_pauseButtonName, OBJPROP_TEXT, (m_isTradingActive ? m_buttonTextRunning : m_buttonTextPaused));
             ObjectSetInteger(0, m_pauseButtonName, OBJPROP_BGCOLOR, (m_isTradingActive ? m_buttonColorRunning : m_buttonColorPaused));
         }
+        ChartRedraw();   // after updating UI properties
     }
 
     void SetPauseBuyButtonState(bool state) {
@@ -255,6 +294,7 @@ class UIHandler {
             ObjectSetInteger(0, m_buyButtonName, OBJPROP_STATE, m_isBuyActive);
             ObjectSetInteger(0, m_buyButtonName, OBJPROP_BGCOLOR, (m_isBuyActive ? clrGreen : clrGray));
         }
+        ChartRedraw();   // after updating UI properties
     }
 
     void SetPauseSellButtonState(bool state) {
@@ -263,5 +303,6 @@ class UIHandler {
             ObjectSetInteger(0, m_sellButtonName, OBJPROP_STATE, m_isSellActive);
             ObjectSetInteger(0, m_sellButtonName, OBJPROP_BGCOLOR, (m_isSellActive ? clrRed : clrGray));
         }
+        ChartRedraw();   // after updating UI properties
     }
 };
