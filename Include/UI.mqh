@@ -8,6 +8,7 @@
 class UIHandler {
   private:
     bool isTesterMode;
+    int  dayAdjustment;
 
     // Datetime label
     string m_dateLabelName;
@@ -78,7 +79,8 @@ class UIHandler {
 
   public:
     UIHandler() {
-        isTesterMode = (bool)MQLInfoInteger(MQL_TESTER) && (bool)MQLInfoInteger(MQL_VISUAL_MODE);
+        isTesterMode  = (bool)MQLInfoInteger(MQL_TESTER) && (bool)MQLInfoInteger(MQL_VISUAL_MODE);
+        dayAdjustment = 1;
 
         // Datetime label
         m_dateLabelName = "DATETIME_LABEL";
@@ -624,7 +626,7 @@ class UIHandler {
     // Function to check if day trading is allowed for a specific day based on the button state
     bool IsDayAllowed(int dayIndex) {
         if(dayIndex < 0 || dayIndex >= 5) {
-            Print("Invalid day index.");
+            Print("\nInvalid day index.");
             return false;
         }
 
@@ -635,47 +637,92 @@ class UIHandler {
     // Function to check if the current time is within the defined trading window for a specific day
     bool IsWithinTradingTime(int dayIndex) {
         if(dayIndex < 0 || dayIndex >= 5) {
-            Print("Invalid day index.");
+            Print("\nInvalid day index.");
             return false;
         }
 
-        datetime currentTime = TimeCurrent();
-        datetime startTime   = m_dayStartTimes[dayIndex];
-        datetime endTime     = m_dayEndTimes[dayIndex];
+        // Extract current time components using MqlDateTime
+        datetime    currentTime   = TimeCurrent();
+        MqlDateTime currentStruct = {};
+        TimeToStruct(currentTime, currentStruct);
 
-        // Check if current time is between start and end time
-        return (currentTime >= startTime && currentTime <= endTime);
+        // Extract start time components using MqlDateTime
+        datetime    startTime   = m_dayStartTimes[dayIndex];
+        MqlDateTime startStruct = {};
+        TimeToStruct(startTime, startStruct);
+
+        // Extract end time components using MqlDateTime
+        datetime    endTime   = m_dayEndTimes[dayIndex];
+        MqlDateTime endStruct = {};
+        TimeToStruct(endTime, endStruct);
+
+        // Compare only the time of day (ignoring date)
+        bool afterStartTime = (currentStruct.hour > startStruct.hour) ||
+                              (currentStruct.hour == startStruct.hour && currentStruct.min > startStruct.min) ||
+                              (currentStruct.hour == startStruct.hour && currentStruct.min == startStruct.min && currentStruct.sec >= startStruct.sec);
+
+        bool beforeEndTime = (currentStruct.hour < endStruct.hour) ||
+                             (currentStruct.hour == endStruct.hour && currentStruct.min < endStruct.min) ||
+                             (currentStruct.hour == endStruct.hour && currentStruct.min == endStruct.min && currentStruct.sec <= endStruct.sec);
+
+        PrintFormat("Day index: %d", dayIndex);
+        PrintFormat("Current Time: %02d:%02d:%02d", currentStruct.hour, currentStruct.min, currentStruct.sec);
+        PrintFormat("Start Time: %02d:%02d:%02d", startStruct.hour, startStruct.min, startStruct.sec);
+        PrintFormat("End Time: %02d:%02d:%02d", endStruct.hour, endStruct.min, endStruct.sec);
+
+        // Check if the current time is within the trading window
+        return (afterStartTime && beforeEndTime);
     }
 
     // Function to check the trading state based on the current day of the week
     bool CheckWeekdayTradingStates() {
-        // Declare MqlDateTime structure to hold local time details
-        MqlDateTime tm = {};
-
-        // Get the current local time
-        datetime currentTime = TimeCurrent();
-        TimeToStruct(currentTime, tm);   // Convert the current time to MqlDateTime structure
+        //--- declare the MqlDateTime variable to be filled with date/time data and get the time of the last quote and the estimated current time of the trade server
+        MqlDateTime tm           = {};
+        datetime    time_current = TimeCurrent();                     // first form of call: time of the last quote for one of the symbols in the Market Watch window
+        datetime    time_server  = TimeTradeServer(tm);               // second form of call: estimated current time of the trade server with filling in the MqlDateTime structure
+        int         difference   = int(time_current - time_server);   // difference between Time Current and Time Trade Server
 
         // Get the current day of the week (0 = Sunday, 1 = Monday, ..., 6 = Saturday)
         int currentDayOfWeek = tm.day_of_week - 1;   // This gives a value from 0 (Sunday) to 6 (Saturday)
 
         // Check if it's a valid day index (0 to 4, assuming we're only considering weekdays for trading)
         if(currentDayOfWeek < 0 || currentDayOfWeek >= 5) {
-            Print("Non-trading day or invalid day.");
+            Print("\nNon-trading day or invalid day.");
             return false;
         }
 
         // Check if day trading is allowed for the current day
         bool isDayAllowed = IsDayAllowed(currentDayOfWeek);
         if(!isDayAllowed) {
-            Print("Day trading is not allowed for today.");
+            Print("\nDay trading is not allowed for today.");
             return false;
         }
 
         // Check if the current time is within the trading window for the current day
         bool isWithinTradingTime = IsWithinTradingTime(currentDayOfWeek);
         if(!isWithinTradingTime) {
-            Print("Current time is outside of the trading window.");
+            Print("\nCurrent time is outside of the trading window.");
+
+            //--- display the time of the last quote and the estimated current time of the trade server with the data of the filled MqlDateTime structure in the log
+            PrintFormat("Time Current: %s\nTime Trade Server: %s\n- Year: %u\n- Month: %02u\n- Day: %02u\n" +
+                            "- Hour: %02u\n- Min: %02u\n- Sec: %02u\n- Day of Year: %03u\n- Day of Week: %u (%s)\nDifference between Time Current and Time Trade Server: %+d",
+                        (string)time_current, (string)time_server, tm.year, tm.mon, tm.day, tm.hour, tm.min, tm.sec, tm.day_of_year, tm.day_of_week,
+                        EnumToString((ENUM_DAY_OF_WEEK)tm.day_of_week), difference);
+            /*
+            result:
+            Time Current: 2024.04.18 16:10:14
+            Time Trade Server: 2024.04.18 16:10:15
+            - Year: 2024
+            - Month: 04
+            - Day: 18
+            - Hour: 16
+            - Min: 10
+            - Sec: 15
+            - Day of Year: 108
+            - Day of Week: 4 (THURSDAY)
+            Difference between Time Current and Time Trade Server: -1
+            */
+
             return false;
         } else {
             Print("Current time is within of the trading window.");
@@ -686,7 +733,7 @@ class UIHandler {
     }
 
     // Delete all/Clean up
-    void DeleteButtons() {
+    void Delete() {
 
         Print("Deleting UI items");
 
