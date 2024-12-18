@@ -542,21 +542,24 @@ class UIHandler {
     datetime GetDayStartTime(int dayIndex) {
         // In tester mode, allow manual override of start time
         if(isTesterMode) {
-            if(dayIndex >= 0 && dayIndex < 5 && ObjectFind(0, m_dayStartTimeInputNames[dayIndex]) >= 0) {
-                string currentText = ObjectGetString(0, m_dayStartTimeInputNames[dayIndex], OBJPROP_TEXT);
+            if(dayIndex >= 0 && dayIndex < 5 && (ObjectFind(0, m_dayStartTimeIncrButtonNames[dayIndex]) >= 0)) {
+                bool currState = ObjectGetInteger(0, m_dayStartTimeIncrButtonNames[dayIndex], OBJPROP_STATE);
 
-                // If the text is empty, revert to the stored time
-                if(currentText == "") {
-                    ObjectSetString(0, m_dayStartTimeInputNames[dayIndex], OBJPROP_TEXT,
-                                    TimeToString(m_dayStartTimes[dayIndex], TIME_MINUTES));
-                    return m_dayStartTimes[dayIndex];
-                }
-
-                datetime newStartTime = StringToTime(currentText);
-
-                // Validate the time conversion
-                if(newStartTime > 0) {
+                if(currState) {
+                    datetime newStartTime = m_dayStartTimes[dayIndex] + TIME_INCREMENT;
                     SetDayTradingTimes(dayIndex, newStartTime, m_dayEndTimes[dayIndex]);
+                    m_IsDayStartTimeDecrButtonActive[dayIndex] = !currState;   // change the state to false
+                    return newStartTime;
+                }
+            }
+
+            if(dayIndex >= 0 && dayIndex < 5 && (ObjectFind(0, m_dayStartTimeDecrButtonNames[dayIndex]) >= 0)) {
+                bool currState = ObjectGetInteger(0, m_dayStartTimeDecrButtonNames[dayIndex], OBJPROP_STATE);
+
+                if(currState) {
+                    datetime newStartTime = m_dayStartTimes[dayIndex] - TIME_INCREMENT;
+                    SetDayTradingTimes(dayIndex, newStartTime, m_dayEndTimes[dayIndex]);
+                    m_IsDayStartTimeDecrButtonActive[dayIndex] = !currState;   // change the state to false
                     return newStartTime;
                 }
             }
@@ -568,23 +571,26 @@ class UIHandler {
     }
 
     datetime GetDayEndTime(int dayIndex) {
-        // In tester mode, allow manual override of end time
+
         if(isTesterMode) {
-            if(dayIndex >= 0 && dayIndex < 5 && ObjectFind(0, m_dayEndTimeInputNames[dayIndex]) >= 0) {
-                string currentText = ObjectGetString(0, m_dayEndTimeInputNames[dayIndex], OBJPROP_TEXT);
+            if(dayIndex >= 0 && dayIndex < 5 && (ObjectFind(0, m_dayEndTimeIncrButtonNames[dayIndex]) >= 0)) {
+                bool currState = ObjectGetInteger(0, m_dayEndTimeIncrButtonNames[dayIndex], OBJPROP_STATE);
 
-                // If the text is empty, revert to the stored time
-                if(currentText == "") {
-                    ObjectSetString(0, m_dayEndTimeInputNames[dayIndex], OBJPROP_TEXT,
-                                    TimeToString(m_dayEndTimes[dayIndex], TIME_MINUTES));
-                    return m_dayEndTimes[dayIndex];
-                }
-
-                datetime newEndTime = StringToTime(currentText);
-
-                // Validate the time conversion
-                if(newEndTime > 0) {
+                if(currState) {
+                    datetime newEndTime = m_dayEndTimes[dayIndex] + TIME_INCREMENT;
                     SetDayTradingTimes(dayIndex, m_dayStartTimes[dayIndex], newEndTime);
+                    m_IsDayEndTimeIncrButtonActive[dayIndex] = !currState;
+                    return newEndTime;
+                }
+            }
+
+            if(dayIndex >= 0 && dayIndex < 5 && (ObjectFind(0, m_dayEndTimeDecrButtonNames[dayIndex]) >= 0)) {
+                bool currState = ObjectGetInteger(0, m_dayEndTimeDecrButtonNames[dayIndex], OBJPROP_STATE);
+
+                if(currState) {
+                    datetime newEndTime = m_dayEndTimes[dayIndex] - TIME_INCREMENT;
+                    SetDayTradingTimes(dayIndex, m_dayStartTimes[dayIndex], newEndTime);
+                    m_IsDayEndTimeDecrButtonActive[dayIndex] = !currState;
                     return newEndTime;
                 }
             }
@@ -594,8 +600,12 @@ class UIHandler {
             return 0;
         return m_dayEndTimes[dayIndex];
     }
+    could i achieve the same isolated button management function, without touching or using the increment and decrement button states ?
 
-    string GetDayButtonName(int index) {
+        And don't remove that ObjectFind and ObjectGetInteger. 
+
+        string
+        GetDayButtonName(int index) {
         return m_dayButtonNames[index];
     }
 
