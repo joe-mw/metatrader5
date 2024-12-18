@@ -66,6 +66,13 @@ class UIHandler {
     string m_dayStartTimeDecrButtonNames[5];
     string m_dayEndTimeIncrButtonNames[5];
     string m_dayEndTimeDecrButtonNames[5];
+
+    // Strategy Tester, we need to test the state of the button, only increment if state changes
+    bool m_IsDayStartTimeIncrButtonActive[5];
+    bool m_IsDayStartTimeDecrButtonActive[5];
+    bool m_IsDayEndTimeIncrButtonActive[5];
+    bool m_IsDayEndTimeDecrButtonActive[5];
+
     // Constants for time increment (in seconds)
     int TIME_INCREMENT;
 
@@ -121,6 +128,11 @@ class UIHandler {
         // Initialize day trading state (all days active by default)
         for(int i = 0; i < 5; i++) {
             m_isDayTradingActive[i] = true;
+
+            m_IsDayStartTimeIncrButtonActive[i] = false;
+            m_IsDayStartTimeDecrButtonActive[i] = false;
+            m_IsDayEndTimeIncrButtonActive[i]   = false;
+            m_IsDayEndTimeDecrButtonActive[i]   = false;
 
             // Create day button names
             m_dayButtonNames[i]          = "DAY_BUTTON_" + m_dayNames[i];
@@ -540,26 +552,23 @@ class UIHandler {
     }
 
     datetime GetDayStartTime(int dayIndex) {
-        // In tester mode, allow manual override of start time
         if(isTesterMode) {
-            if(dayIndex >= 0 && dayIndex < 5 && (ObjectFind(0, m_dayStartTimeIncrButtonNames[dayIndex]) >= 0)) {
-                bool currState = ObjectGetInteger(0, m_dayStartTimeIncrButtonNames[dayIndex], OBJPROP_STATE);
-
-                if(currState) {
+            // Increment start time on click
+            if(dayIndex >= 0 && dayIndex < 5 && ObjectFind(0, m_dayStartTimeIncrButtonNames[dayIndex]) >= 0) {
+                if(ObjectGetInteger(0, m_dayStartTimeIncrButtonNames[dayIndex], OBJPROP_STATE)) {
                     datetime newStartTime = m_dayStartTimes[dayIndex] + TIME_INCREMENT;
                     SetDayTradingTimes(dayIndex, newStartTime, m_dayEndTimes[dayIndex]);
-                    m_IsDayStartTimeDecrButtonActive[dayIndex] = !currState;   // change the state to false
+                    ObjectSetInteger(0, m_dayStartTimeIncrButtonNames[dayIndex], OBJPROP_STATE, false);   // Reset state
                     return newStartTime;
                 }
             }
 
-            if(dayIndex >= 0 && dayIndex < 5 && (ObjectFind(0, m_dayStartTimeDecrButtonNames[dayIndex]) >= 0)) {
-                bool currState = ObjectGetInteger(0, m_dayStartTimeDecrButtonNames[dayIndex], OBJPROP_STATE);
-
-                if(currState) {
+            // Decrement start time on click
+            if(dayIndex >= 0 && dayIndex < 5 && ObjectFind(0, m_dayStartTimeDecrButtonNames[dayIndex]) >= 0) {
+                if(ObjectGetInteger(0, m_dayStartTimeDecrButtonNames[dayIndex], OBJPROP_STATE)) {
                     datetime newStartTime = m_dayStartTimes[dayIndex] - TIME_INCREMENT;
                     SetDayTradingTimes(dayIndex, newStartTime, m_dayEndTimes[dayIndex]);
-                    m_IsDayStartTimeDecrButtonActive[dayIndex] = !currState;   // change the state to false
+                    ObjectSetInteger(0, m_dayStartTimeDecrButtonNames[dayIndex], OBJPROP_STATE, false);   // Reset state
                     return newStartTime;
                 }
             }
@@ -567,30 +576,28 @@ class UIHandler {
 
         if(dayIndex < 0 || dayIndex >= 5)
             return 0;
+
         return m_dayStartTimes[dayIndex];
     }
 
     datetime GetDayEndTime(int dayIndex) {
-
         if(isTesterMode) {
-            if(dayIndex >= 0 && dayIndex < 5 && (ObjectFind(0, m_dayEndTimeIncrButtonNames[dayIndex]) >= 0)) {
-                bool currState = ObjectGetInteger(0, m_dayEndTimeIncrButtonNames[dayIndex], OBJPROP_STATE);
-
-                if(currState) {
+            // Increment end time on click
+            if(dayIndex >= 0 && dayIndex < 5 && ObjectFind(0, m_dayEndTimeIncrButtonNames[dayIndex]) >= 0) {
+                if(ObjectGetInteger(0, m_dayEndTimeIncrButtonNames[dayIndex], OBJPROP_STATE)) {
                     datetime newEndTime = m_dayEndTimes[dayIndex] + TIME_INCREMENT;
                     SetDayTradingTimes(dayIndex, m_dayStartTimes[dayIndex], newEndTime);
-                    m_IsDayEndTimeIncrButtonActive[dayIndex] = !currState;
+                    ObjectSetInteger(0, m_dayEndTimeIncrButtonNames[dayIndex], OBJPROP_STATE, false);   // Reset state
                     return newEndTime;
                 }
             }
 
-            if(dayIndex >= 0 && dayIndex < 5 && (ObjectFind(0, m_dayEndTimeDecrButtonNames[dayIndex]) >= 0)) {
-                bool currState = ObjectGetInteger(0, m_dayEndTimeDecrButtonNames[dayIndex], OBJPROP_STATE);
-
-                if(currState) {
+            // Decrement end time on click
+            if(dayIndex >= 0 && dayIndex < 5 && ObjectFind(0, m_dayEndTimeDecrButtonNames[dayIndex]) >= 0) {
+                if(ObjectGetInteger(0, m_dayEndTimeDecrButtonNames[dayIndex], OBJPROP_STATE)) {
                     datetime newEndTime = m_dayEndTimes[dayIndex] - TIME_INCREMENT;
                     SetDayTradingTimes(dayIndex, m_dayStartTimes[dayIndex], newEndTime);
-                    m_IsDayEndTimeDecrButtonActive[dayIndex] = !currState;
+                    ObjectSetInteger(0, m_dayEndTimeDecrButtonNames[dayIndex], OBJPROP_STATE, false);   // Reset state
                     return newEndTime;
                 }
             }
@@ -598,14 +605,11 @@ class UIHandler {
 
         if(dayIndex < 0 || dayIndex >= 5)
             return 0;
+
         return m_dayEndTimes[dayIndex];
     }
-    could i achieve the same isolated button management function, without touching or using the increment and decrement button states ?
 
-        And don't remove that ObjectFind and ObjectGetInteger. 
-
-        string
-        GetDayButtonName(int index) {
+    string GetDayButtonName(int index) {
         return m_dayButtonNames[index];
     }
 
@@ -644,12 +648,12 @@ class UIHandler {
     }
 
     // Function to check the trading state based on the current day of the week
-    bool CheckTradingState() {
+    bool CheckWeekdayTradingStates() {
         // Declare MqlDateTime structure to hold local time details
         MqlDateTime tm = {};
 
         // Get the current local time
-        datetime currentTime = TimeLocal();
+        datetime currentTime = TimeCurrent();
         TimeToStruct(currentTime, tm);   // Convert the current time to MqlDateTime structure
 
         // Get the current day of the week (0 = Sunday, 1 = Monday, ..., 6 = Saturday)
@@ -753,7 +757,6 @@ class UIHandler {
         }
 
         PrintFormat("Day Trading Time Change: dayIndex: %s, startTime: %s, endTime: %s", (string)dayIndex, TimeToString(startTime, TIME_MINUTES), TimeToString(endTime, TIME_MINUTES));
-        ChartRedraw(0);
     }
 
   private:
@@ -765,8 +768,6 @@ class UIHandler {
             ObjectSetString(0, m_pauseButtonName, OBJPROP_TEXT, (m_isTradingActive ? m_buttonTextRunning : m_buttonTextPaused));
             ObjectSetInteger(0, m_pauseButtonName, OBJPROP_BGCOLOR, (m_isTradingActive ? m_buttonColorRunning : m_buttonColorPaused));
         }
-
-        ChartRedraw(0);   // after updating UI properties
     }
 
     void SetPauseBuyButtonState(bool state) {
@@ -775,7 +776,6 @@ class UIHandler {
             ObjectSetInteger(0, m_buyButtonName, OBJPROP_STATE, m_isBuyActive);
             ObjectSetInteger(0, m_buyButtonName, OBJPROP_BGCOLOR, (m_isBuyActive ? clrGreen : clrGray));
         }
-        ChartRedraw(0);   // after updating UI properties
     }
 
     void SetPauseSellButtonState(bool state) {
@@ -784,7 +784,6 @@ class UIHandler {
             ObjectSetInteger(0, m_sellButtonName, OBJPROP_STATE, m_isSellActive);
             ObjectSetInteger(0, m_sellButtonName, OBJPROP_BGCOLOR, (m_isSellActive ? clrRed : clrGray));
         }
-        ChartRedraw(0);   // after updating UI properties
     }
 
     void SetDayButtonState(int dayIndex, bool state) {
@@ -797,6 +796,5 @@ class UIHandler {
             ObjectSetInteger(0, m_dayButtonNames[dayIndex], OBJPROP_BGCOLOR, (state ? m_buttonColorRunning : clrBlueViolet));
         }
         PrintFormat(m_dayButtonNames[dayIndex] + " toggled. New state: " + (string)state);
-        ChartRedraw(0);
     }
 };
