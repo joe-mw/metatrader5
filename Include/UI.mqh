@@ -1,6 +1,6 @@
 //+------------------------------------------------------------------+
-//|                                                            UI.mqh  |
-//|                   Custom UI Utility for Expert Advisor          |
+//|                                                          UI.mqh  |
+//|                   Custom UI Utility for Expert Advisor           |
 //|                                                                  |
 //+------------------------------------------------------------------+
 #property strict
@@ -61,6 +61,14 @@ class UIHandler {
 
     string m_dayTimeResetButtonNames[5];
 
+    // For time increment/decrement button names
+    string m_dayStartTimeIncrButtonNames[5];
+    string m_dayStartTimeDecrButtonNames[5];
+    string m_dayEndTimeIncrButtonNames[5];
+    string m_dayEndTimeDecrButtonNames[5];
+    // Constants for time increment (in seconds)
+    int TIME_INCREMENT;
+
   public:
     UIHandler() {
         isTesterMode = (bool)MQLInfoInteger(MQL_TESTER) && (bool)MQLInfoInteger(MQL_VISUAL_MODE);
@@ -71,7 +79,7 @@ class UIHandler {
         // Main Pause/Play Button properties
         m_isTradingActive      = true;   // true = trading on
         m_pauseButtonName      = "BUTTON_PAUSE";
-        m_pauseButtonXPosition = 370;
+        m_pauseButtonXPosition = 450;
         m_pauseButtonYPosition = 100;
         m_pauseButtonWidth     = 100;
         m_pauseButtonHeight    = 30;
@@ -123,7 +131,15 @@ class UIHandler {
             // Set default start and end times (example times)
             m_dayStartTimes[i] = StringToTime("04:00");
             m_dayEndTimes[i]   = StringToTime("18:00");
+
+            // Time increment and decrement
+            m_dayStartTimeIncrButtonNames[i] = "START_TIME_INCR_" + m_dayNames[i];
+            m_dayStartTimeDecrButtonNames[i] = "START_TIME_DECR_" + m_dayNames[i];
+            m_dayEndTimeIncrButtonNames[i]   = "END_TIME_INCR_" + m_dayNames[i];
+            m_dayEndTimeDecrButtonNames[i]   = "END_TIME_DECR_" + m_dayNames[i];
         }
+
+        TIME_INCREMENT = 900;   // 15 minutes
 
         // Timestamp label
         DrawDateTimeLabel();
@@ -258,10 +274,38 @@ class UIHandler {
 
             ObjectSetString(0, m_dayStartTimeInputNames[i], OBJPROP_TEXT, TimeToString(m_dayStartTimes[i], TIME_MINUTES));
 
+            // Start Time Increment Button
+            ObjectDelete(0, m_dayStartTimeIncrButtonNames[i]);
+            ObjectCreate(0, m_dayStartTimeIncrButtonNames[i], OBJ_BUTTON, 0, 0, 0);
+            ObjectSetInteger(0, m_dayStartTimeIncrButtonNames[i], OBJPROP_XDISTANCE, m_pauseButtonXPosition - 120 - 90);
+            ObjectSetInteger(0, m_dayStartTimeIncrButtonNames[i], OBJPROP_YDISTANCE, 100 + (m_pauseButtonHeight * (i + 2)) + 7);
+            ObjectSetInteger(0, m_dayStartTimeIncrButtonNames[i], OBJPROP_XSIZE, 15);
+            ObjectSetInteger(0, m_dayStartTimeIncrButtonNames[i], OBJPROP_YSIZE, 15);
+            ObjectSetInteger(0, m_dayStartTimeIncrButtonNames[i], OBJPROP_CORNER, m_buttonCorner);
+            ObjectSetString(0, m_dayStartTimeIncrButtonNames[i], OBJPROP_FONT, m_iconFont);
+            ObjectSetInteger(0, m_dayStartTimeIncrButtonNames[i], OBJPROP_FONTSIZE, m_iconFontSize);
+            ObjectSetString(0, m_dayStartTimeIncrButtonNames[i], OBJPROP_TEXT, "+");
+            ObjectSetInteger(0, m_dayStartTimeIncrButtonNames[i], OBJPROP_COLOR, clrWhite);
+            ObjectSetInteger(0, m_dayStartTimeIncrButtonNames[i], OBJPROP_BGCOLOR, clrDarkGreen);
+
+            // Start Time Decrement Button
+            ObjectDelete(0, m_dayStartTimeDecrButtonNames[i]);
+            ObjectCreate(0, m_dayStartTimeDecrButtonNames[i], OBJ_BUTTON, 0, 0, 0);
+            ObjectSetInteger(0, m_dayStartTimeDecrButtonNames[i], OBJPROP_XDISTANCE, m_pauseButtonXPosition - 120 - 110);
+            ObjectSetInteger(0, m_dayStartTimeDecrButtonNames[i], OBJPROP_YDISTANCE, 100 + (m_pauseButtonHeight * (i + 2)) + 7);
+            ObjectSetInteger(0, m_dayStartTimeDecrButtonNames[i], OBJPROP_XSIZE, 15);
+            ObjectSetInteger(0, m_dayStartTimeDecrButtonNames[i], OBJPROP_YSIZE, 15);
+            ObjectSetInteger(0, m_dayStartTimeDecrButtonNames[i], OBJPROP_CORNER, m_buttonCorner);
+            ObjectSetString(0, m_dayStartTimeDecrButtonNames[i], OBJPROP_FONT, m_iconFont);
+            ObjectSetInteger(0, m_dayStartTimeDecrButtonNames[i], OBJPROP_FONTSIZE, m_iconFontSize);
+            ObjectSetString(0, m_dayStartTimeDecrButtonNames[i], OBJPROP_TEXT, "-");
+            ObjectSetInteger(0, m_dayStartTimeDecrButtonNames[i], OBJPROP_COLOR, clrWhite);
+            ObjectSetInteger(0, m_dayStartTimeDecrButtonNames[i], OBJPROP_BGCOLOR, clrDarkRed);
+
             // End Time Input
             ObjectDelete(0, m_dayEndTimeInputNames[i]);
             ObjectCreate(0, m_dayEndTimeInputNames[i], OBJ_EDIT, 0, 0, 0);
-            ObjectSetInteger(0, m_dayEndTimeInputNames[i], OBJPROP_XDISTANCE, m_pauseButtonXPosition - 220);
+            ObjectSetInteger(0, m_dayEndTimeInputNames[i], OBJPROP_XDISTANCE, m_pauseButtonXPosition - 260);
             ObjectSetInteger(0, m_dayEndTimeInputNames[i], OBJPROP_YDISTANCE, 100 + (m_pauseButtonHeight * (i + 2)));
             ObjectSetInteger(0, m_dayEndTimeInputNames[i], OBJPROP_XSIZE, 80);
             ObjectSetInteger(0, m_dayEndTimeInputNames[i], OBJPROP_YSIZE, m_pauseButtonHeight);
@@ -275,10 +319,38 @@ class UIHandler {
 
             ObjectSetString(0, m_dayEndTimeInputNames[i], OBJPROP_TEXT, TimeToString(m_dayEndTimes[i], TIME_MINUTES));
 
+            // End Time Increment Button
+            ObjectDelete(0, m_dayEndTimeIncrButtonNames[i]);
+            ObjectCreate(0, m_dayEndTimeIncrButtonNames[i], OBJ_BUTTON, 0, 0, 0);
+            ObjectSetInteger(0, m_dayEndTimeIncrButtonNames[i], OBJPROP_XDISTANCE, m_pauseButtonXPosition - 260 - 90);
+            ObjectSetInteger(0, m_dayEndTimeIncrButtonNames[i], OBJPROP_YDISTANCE, 100 + (m_pauseButtonHeight * (i + 2)) + 7);
+            ObjectSetInteger(0, m_dayEndTimeIncrButtonNames[i], OBJPROP_XSIZE, 15);
+            ObjectSetInteger(0, m_dayEndTimeIncrButtonNames[i], OBJPROP_YSIZE, 15);
+            ObjectSetInteger(0, m_dayEndTimeIncrButtonNames[i], OBJPROP_CORNER, m_buttonCorner);
+            ObjectSetString(0, m_dayEndTimeIncrButtonNames[i], OBJPROP_FONT, m_iconFont);
+            ObjectSetInteger(0, m_dayEndTimeIncrButtonNames[i], OBJPROP_FONTSIZE, m_iconFontSize);
+            ObjectSetString(0, m_dayEndTimeIncrButtonNames[i], OBJPROP_TEXT, "+");
+            ObjectSetInteger(0, m_dayEndTimeIncrButtonNames[i], OBJPROP_COLOR, clrWhite);
+            ObjectSetInteger(0, m_dayEndTimeIncrButtonNames[i], OBJPROP_BGCOLOR, clrDarkGreen);
+
+            // End Time Decrement Button
+            ObjectDelete(0, m_dayEndTimeDecrButtonNames[i]);
+            ObjectCreate(0, m_dayEndTimeDecrButtonNames[i], OBJ_BUTTON, 0, 0, 0);
+            ObjectSetInteger(0, m_dayEndTimeDecrButtonNames[i], OBJPROP_XDISTANCE, m_pauseButtonXPosition - 260 - 110);
+            ObjectSetInteger(0, m_dayEndTimeDecrButtonNames[i], OBJPROP_YDISTANCE, 100 + (m_pauseButtonHeight * (i + 2)) + 7);
+            ObjectSetInteger(0, m_dayEndTimeDecrButtonNames[i], OBJPROP_XSIZE, 15);
+            ObjectSetInteger(0, m_dayEndTimeDecrButtonNames[i], OBJPROP_YSIZE, 15);
+            ObjectSetInteger(0, m_dayEndTimeDecrButtonNames[i], OBJPROP_CORNER, m_buttonCorner);
+            ObjectSetString(0, m_dayEndTimeDecrButtonNames[i], OBJPROP_FONT, m_iconFont);
+            ObjectSetInteger(0, m_dayEndTimeDecrButtonNames[i], OBJPROP_FONTSIZE, m_iconFontSize);
+            ObjectSetString(0, m_dayEndTimeDecrButtonNames[i], OBJPROP_TEXT, "-");
+            ObjectSetInteger(0, m_dayEndTimeDecrButtonNames[i], OBJPROP_COLOR, clrWhite);
+            ObjectSetInteger(0, m_dayEndTimeDecrButtonNames[i], OBJPROP_BGCOLOR, clrDarkRed);
+
             // Reset Button
             ObjectDelete(0, m_dayTimeResetButtonNames[i]);
             ObjectCreate(0, m_dayTimeResetButtonNames[i], OBJ_BUTTON, 0, 0, 0);
-            ObjectSetInteger(0, m_dayTimeResetButtonNames[i], OBJPROP_XDISTANCE, m_pauseButtonXPosition - 320);
+            ObjectSetInteger(0, m_dayTimeResetButtonNames[i], OBJPROP_XDISTANCE, m_pauseButtonXPosition - 400);
             ObjectSetInteger(0, m_dayTimeResetButtonNames[i], OBJPROP_YDISTANCE, 100 + (m_pauseButtonHeight * (i + 2)));
             ObjectSetInteger(0, m_dayTimeResetButtonNames[i], OBJPROP_XSIZE, 30);
             ObjectSetInteger(0, m_dayTimeResetButtonNames[i], OBJPROP_YSIZE, m_pauseButtonHeight);
@@ -297,6 +369,37 @@ class UIHandler {
         // First, check time input changes
         if(HandleTimeInputChanges(sparam)) {
             return true;
+        }
+
+        // Then check for time increment/decrement button clicks
+        for(int i = 0; i < 5; i++) {
+            // Start Time Increment
+            if(sparam == m_dayStartTimeIncrButtonNames[i]) {
+                datetime newStartTime = m_dayStartTimes[i] + TIME_INCREMENT;
+                SetDayTradingTimes(i, newStartTime, m_dayEndTimes[i]);
+                return true;
+            }
+
+            // Start Time Decrement
+            if(sparam == m_dayStartTimeDecrButtonNames[i]) {
+                datetime newStartTime = m_dayStartTimes[i] - TIME_INCREMENT;
+                SetDayTradingTimes(i, newStartTime, m_dayEndTimes[i]);
+                return true;
+            }
+
+            // End Time Increment
+            if(sparam == m_dayEndTimeIncrButtonNames[i]) {
+                datetime newEndTime = m_dayEndTimes[i] + TIME_INCREMENT;
+                SetDayTradingTimes(i, m_dayStartTimes[i], newEndTime);
+                return true;
+            }
+
+            // End Time Decrement
+            if(sparam == m_dayEndTimeDecrButtonNames[i]) {
+                datetime newEndTime = m_dayEndTimes[i] - TIME_INCREMENT;
+                SetDayTradingTimes(i, m_dayStartTimes[i], newEndTime);
+                return true;
+            }
         }
 
         // Handle reset button clicks
@@ -504,6 +607,70 @@ class UIHandler {
         return m_dayEndTimeInputNames[index];
     }
 
+    // Function to check if day trading is allowed for a specific day based on the button state
+    bool IsDayAllowed(int dayIndex) {
+        if(dayIndex < 0 || dayIndex >= 5) {
+            Print("Invalid day index.");
+            return false;
+        }
+
+        // Return whether the day is active based on button state
+        return m_isDayTradingActive[dayIndex];
+    }
+
+    // Function to check if the current time is within the defined trading window for a specific day
+    bool IsWithinTradingTime(int dayIndex) {
+        if(dayIndex < 0 || dayIndex >= 5) {
+            Print("Invalid day index.");
+            return false;
+        }
+
+        datetime currentTime = TimeCurrent();
+        datetime startTime   = m_dayStartTimes[dayIndex];
+        datetime endTime     = m_dayEndTimes[dayIndex];
+
+        // Check if current time is between start and end time
+        return (currentTime >= startTime && currentTime <= endTime);
+    }
+
+    // Function to check the trading state based on the current day of the week
+    bool CheckTradingState() {
+        // Declare MqlDateTime structure to hold local time details
+        MqlDateTime tm = {};
+
+        // Get the current local time
+        datetime currentTime = TimeLocal();
+        TimeToStruct(currentTime, tm);   // Convert the current time to MqlDateTime structure
+
+        // Get the current day of the week (0 = Sunday, 1 = Monday, ..., 6 = Saturday)
+        int currentDayOfWeek = tm.day_of_week - 1;   // This gives a value from 0 (Sunday) to 6 (Saturday)
+
+        // Check if it's a valid day index (0 to 4, assuming we're only considering weekdays for trading)
+        if(currentDayOfWeek < 0 || currentDayOfWeek >= 5) {
+            Print("Non-trading day or invalid day.");
+            return false;
+        }
+
+        // Check if day trading is allowed for the current day
+        bool isDayAllowed = IsDayAllowed(currentDayOfWeek);
+        if(!isDayAllowed) {
+            Print("Day trading is not allowed for today.");
+            return false;
+        }
+
+        // Check if the current time is within the trading window for the current day
+        bool isWithinTradingTime = IsWithinTradingTime(currentDayOfWeek);
+        if(!isWithinTradingTime) {
+            Print("Current time is outside of the trading window.");
+            return false;
+        } else {
+            Print("Current time is within of the trading window.");
+        }
+
+        // If both checks pass, return true (trading is allowed)
+        return true;
+    }
+
     // Delete all/Clean up
     void DeleteButtons() {
 
@@ -521,6 +688,10 @@ class UIHandler {
             ObjectDelete(0, m_dayStartTimeInputNames[i]);
             ObjectDelete(0, m_dayEndTimeInputNames[i]);
             ObjectDelete(0, m_dayTimeResetButtonNames[i]);
+            ObjectDelete(0, m_dayStartTimeIncrButtonNames[i]);
+            ObjectDelete(0, m_dayStartTimeDecrButtonNames[i]);
+            ObjectDelete(0, m_dayEndTimeIncrButtonNames[i]);
+            ObjectDelete(0, m_dayEndTimeDecrButtonNames[i]);
         }
     }
 
