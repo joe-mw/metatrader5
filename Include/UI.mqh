@@ -190,7 +190,7 @@ class UIHandler {
     }
 
     void DrawPauseTradingStateButton() {
-        Print("Drawing Pause/Play buttons");
+        // Print("Drawing Pause/Play buttons");
 
         // Draw Main Pause/Play Button
         ObjectDelete(0, m_pauseButtonName);
@@ -448,7 +448,7 @@ class UIHandler {
     // USED IN LIVE CHART, NOT USED IN STRATEGY TESTER AT ALL
     bool BaseRender(const string &sparam, const int &id) {
         if(id != CHARTEVENT_OBJECT_CLICK) {
-            Print("Event is not an object click. Exiting RefreshButtons.");
+            // Print("Event is not an object click. Exiting RefreshButtons.");
             return false;
         }
 
@@ -469,7 +469,7 @@ class UIHandler {
                 SetPauseSellButtonState(m_isSellActive);
             }
 
-            PrintFormat("Main Pause/Play button toggled. New state: " + (string)m_isTradingActive);
+            // PrintFormat("Main Pause/Play button toggled. New state: " + (string)m_isTradingActive);
             return true;
         }
 
@@ -478,14 +478,14 @@ class UIHandler {
             if(sparam == m_buyButtonName) {
                 m_isBuyActive = !m_isBuyActive;
                 SetPauseBuyButtonState(m_isBuyActive);
-                PrintFormat("Pause Buy button toggled. New state: " + (string)m_isBuyActive);
+                // PrintFormat("Pause Buy button toggled. New state: " + (string)m_isBuyActive);
                 return true;
             }
 
             if(sparam == m_sellButtonName) {
                 m_isSellActive = !m_isSellActive;
                 SetPauseSellButtonState(m_isSellActive);
-                PrintFormat("Pause Sell button toggled. New state: " + (string)m_isSellActive);
+                // PrintFormat("Pause Sell button toggled. New state: " + (string)m_isSellActive);
                 return true;
             }
         }
@@ -626,7 +626,7 @@ class UIHandler {
     // Function to check if day trading is allowed for a specific day based on the button state
     bool IsDayAllowed(int dayIndex) {
         if(dayIndex < 0 || dayIndex >= 5) {
-            Print("\nInvalid day index.");
+            // Print("\nInvalid day index.");
             return false;
         }
 
@@ -637,7 +637,7 @@ class UIHandler {
     // Function to check if the current time is within the defined trading window for a specific day
     bool IsWithinTradingTime(int dayIndex) {
         if(dayIndex < 0 || dayIndex >= 5) {
-            Print("\nInvalid day index.");
+            // Print("\nInvalid day index.");
             return false;
         }
 
@@ -665,10 +665,10 @@ class UIHandler {
                              (currentStruct.hour == endStruct.hour && currentStruct.min < endStruct.min) ||
                              (currentStruct.hour == endStruct.hour && currentStruct.min == endStruct.min && currentStruct.sec <= endStruct.sec);
 
-        PrintFormat("Day index: %d", dayIndex);
-        PrintFormat("Current Time: %02d:%02d:%02d", currentStruct.hour, currentStruct.min, currentStruct.sec);
-        PrintFormat("Start Time: %02d:%02d:%02d", startStruct.hour, startStruct.min, startStruct.sec);
-        PrintFormat("End Time: %02d:%02d:%02d", endStruct.hour, endStruct.min, endStruct.sec);
+        // PrintFormat("Day index: %d", dayIndex);
+        // PrintFormat("Current Time: %02d:%02d:%02d", currentStruct.hour, currentStruct.min, currentStruct.sec);
+        // PrintFormat("Start Time: %02d:%02d:%02d", startStruct.hour, startStruct.min, startStruct.sec);
+        // PrintFormat("End Time: %02d:%02d:%02d", endStruct.hour, endStruct.min, endStruct.sec);
 
         // Check if the current time is within the trading window
         return (afterStartTime && beforeEndTime);
@@ -687,27 +687,27 @@ class UIHandler {
 
         // Check if it's a valid day index (0 to 4, assuming we're only considering weekdays for trading)
         if(currentDayOfWeek < 0 || currentDayOfWeek >= 5) {
-            Print("\nNon-trading day or invalid day.");
+            // Print("\nNon-trading day or invalid day.");
             return false;
         }
 
         // Check if day trading is allowed for the current day
         bool isDayAllowed = IsDayAllowed(currentDayOfWeek);
         if(!isDayAllowed) {
-            Print("\nDay trading is not allowed for today.");
+            // Print("\nDay trading is not allowed for today.");
             return false;
         }
 
         // Check if the current time is within the trading window for the current day
         bool isWithinTradingTime = IsWithinTradingTime(currentDayOfWeek);
         if(!isWithinTradingTime) {
-            Print("\nCurrent time is outside of the trading window.");
+            // Print("\nCurrent time is outside of the trading window.");
 
             //--- display the time of the last quote and the estimated current time of the trade server with the data of the filled MqlDateTime structure in the log
-            PrintFormat("Time Current: %s\nTime Trade Server: %s\n- Year: %u\n- Month: %02u\n- Day: %02u\n" +
-                            "- Hour: %02u\n- Min: %02u\n- Sec: %02u\n- Day of Year: %03u\n- Day of Week: %u (%s)\nDifference between Time Current and Time Trade Server: %+d",
-                        (string)time_current, (string)time_server, tm.year, tm.mon, tm.day, tm.hour, tm.min, tm.sec, tm.day_of_year, tm.day_of_week,
-                        EnumToString((ENUM_DAY_OF_WEEK)tm.day_of_week), difference);
+            // PrintFormat("Time Current: %s\nTime Trade Server: %s\n- Year: %u\n- Month: %02u\n- Day: %02u\n" +
+            //                 "- Hour: %02u\n- Min: %02u\n- Sec: %02u\n- Day of Year: %03u\n- Day of Week: %u (%s)\nDifference between Time Current and Time Trade Server: %+d",
+            //             (string)time_current, (string)time_server, tm.year, tm.mon, tm.day, tm.hour, tm.min, tm.sec, tm.day_of_year, tm.day_of_week,
+            //             EnumToString((ENUM_DAY_OF_WEEK)tm.day_of_week), difference);
             /*
             result:
             Time Current: 2024.04.18 16:10:14
@@ -725,7 +725,7 @@ class UIHandler {
 
             return false;
         } else {
-            Print("Current time is within of the trading window.");
+            // Print("Current time is within of the trading window.");
         }
 
         // If both checks pass, return true (trading is allowed)
@@ -735,7 +735,7 @@ class UIHandler {
     // Delete all/Clean up
     void Delete() {
 
-        Print("Deleting UI items");
+        // Print("Deleting UI items");
 
         // Delete first row
         ObjectDelete(0, m_dateLabelName);
@@ -803,7 +803,7 @@ class UIHandler {
                              (endTime == defaultEndTime) ? clrWhite : clrYellow);
         }
 
-        PrintFormat("Day Trading Time Change: dayIndex: %s, startTime: %s, endTime: %s", (string)dayIndex, TimeToString(startTime, TIME_MINUTES), TimeToString(endTime, TIME_MINUTES));
+        // PrintFormat("Day Trading Time Change: dayIndex: %s, startTime: %s, endTime: %s", (string)dayIndex, TimeToString(startTime, TIME_MINUTES), TimeToString(endTime, TIME_MINUTES));
     }
 
   private:
@@ -842,6 +842,7 @@ class UIHandler {
             ObjectSetInteger(0, m_dayButtonNames[dayIndex], OBJPROP_STATE, state);
             ObjectSetInteger(0, m_dayButtonNames[dayIndex], OBJPROP_BGCOLOR, (state ? m_buttonColorRunning : clrBlueViolet));
         }
-        PrintFormat(m_dayButtonNames[dayIndex] + " toggled. New state: " + (string)state);
+        // PrintFormat(m_dayButtonNames[dayIndex] + " toggled. New state: " + (string)state);
+        ChartRedraw(0);
     }
 };
