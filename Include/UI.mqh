@@ -74,6 +74,9 @@ class UIHandler {
     bool m_IsDayEndTimeIncrButtonActive[5];
     bool m_IsDayEndTimeDecrButtonActive[5];
 
+    string m_defaultStartTime;
+    string m_defaultEndTime;
+
     // Constants for time increment (in seconds)
     int TIME_INCREMENT;
 
@@ -127,9 +130,12 @@ class UIHandler {
         m_dayNames[3] = "Thur";
         m_dayNames[4] = "Fri";
 
+        m_defaultStartTime = "03:00";
+        m_defaultEndTime   = "13:00";
+
         // Initialize day trading state (all days active by default)
         for(int i = 0; i < 5; i++) {
-            m_isDayTradingActive[i] = true;
+            i == 4 ? m_isDayTradingActive[i] = false : m_isDayTradingActive[i] = true;
 
             m_IsDayStartTimeIncrButtonActive[i] = false;
             m_IsDayStartTimeDecrButtonActive[i] = false;
@@ -143,8 +149,8 @@ class UIHandler {
             m_dayTimeResetButtonNames[i] = "DAY_TIME_RESET_" + m_dayNames[i];
 
             // Set default start and end times (example times)
-            m_dayStartTimes[i] = StringToTime("04:00");
-            m_dayEndTimes[i]   = StringToTime("18:00");
+            m_dayStartTimes[i] = StringToTime(m_defaultStartTime);
+            m_dayEndTimes[i]   = StringToTime(m_defaultEndTime);
 
             // Time increment and decrement
             m_dayStartTimeIncrButtonNames[i] = "START_TIME_INCR_" + m_dayNames[i];
@@ -268,8 +274,8 @@ class UIHandler {
 
     void DrawDayTimeInputFields() {
         for(int i = 0; i < 5; i++) {
-            datetime defaultStartTime = StringToTime("04:00");
-            datetime defaultEndTime   = StringToTime("18:00");
+            datetime defaultStartTime = StringToTime(m_defaultStartTime);
+            datetime defaultEndTime   = StringToTime(m_defaultEndTime);
 
             // Start Time Input
             ObjectDelete(0, m_dayStartTimeInputNames[i]);
@@ -377,6 +383,54 @@ class UIHandler {
         }
     }
 
+    void OnTick() {
+        DrawDateTimeLabel();
+
+        if(isTesterMode) {
+
+            ChartRedraw(0);
+
+            ObjectSetInteger(0, "BUTTON_PAUSE", OBJPROP_STATE, GetTradingState());
+            ObjectSetInteger(0, "BUTTON_PAUSE_BUY", OBJPROP_STATE, GetBuyState());
+            ObjectSetInteger(0, "BUTTON_PAUSE_SELL", OBJPROP_STATE, GetSellState());
+
+            // Day trading states and times for each day
+            for(int i = 0; i < 5; i++) {
+                string a = GetDayButtonName(i);
+                string b = GetDayStartTimeInputName(i);
+                string c = GetDayEndTimeInputName(i);
+
+                string d = TimeToString(GetDayStartTime(i), TIME_MINUTES);
+                string e = TimeToString(GetDayEndTime(i), TIME_MINUTES);
+
+                // Explicitly call this guy as well to ensure values are updated
+                ObjectSetInteger(0, GetDayButtonName(i), OBJPROP_STATE, GetDayActiveState(i));
+
+                // Explicitly call GetDayStartTime and GetDayEndTime to ensure values are updated
+                datetime startTime = GetDayStartTime(i);
+                datetime endTime   = GetDayEndTime(i);
+
+                // Optional: Reset button state can be added if needed
+                // ObjectSetInteger(0, ui.m_dayTimeResetButtonNames[i], OBJPROP_STATE, false);
+            }
+        }
+    }
+
+    void DrawOnChart() {
+
+        // Timestamp label
+        DrawDateTimeLabel();
+
+        // Controls
+        DrawPauseTradingStateButton();
+        DrawPauseBuyButton();
+        DrawPauseSellButton();
+
+        // Day time controls
+        DrawDayButtons();
+        DrawDayTimeInputFields();
+    }
+
     // Overload Render method to handle new day buttons
     bool Render(const string &sparam, const int &id) {
 
@@ -420,7 +474,7 @@ class UIHandler {
         for(int i = 0; i < 5; i++) {
             if(sparam == m_dayTimeResetButtonNames[i]) {
                 // Reset both start and end times to default
-                SetDayTradingTimes(i, StringToTime("04:00"), StringToTime("18:00"));
+                SetDayTradingTimes(i, StringToTime(m_defaultStartTime), StringToTime(m_defaultEndTime));
 
                 // Redraw input fields to update colors and values
                 DrawDayTimeInputFields();
@@ -781,8 +835,8 @@ class UIHandler {
         if(dayIndex < 0 || dayIndex >= 5)
             return;
 
-        datetime defaultStartTime = StringToTime("04:00");
-        datetime defaultEndTime   = StringToTime("18:00");
+        datetime defaultStartTime = StringToTime(m_defaultStartTime);
+        datetime defaultEndTime   = StringToTime(m_defaultEndTime);
 
         m_dayStartTimes[dayIndex] = startTime;
         m_dayEndTimes[dayIndex]   = endTime;
