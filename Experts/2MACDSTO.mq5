@@ -10,7 +10,7 @@
 #property description "NZDUSD-3H  2020.01.01 - 2023.10.08"
 
 #include <Geraked/EAUtils.mqh>
-#include <Geraked\\Ui.mqh>
+#include <Geraked/Ui.mqh>
 
 input group "Indicator Parameters" input int M1Fast     = 13;            // MACD1 Fast
 input int                                    M1Slow     = 21;            // MACD1 Slow
